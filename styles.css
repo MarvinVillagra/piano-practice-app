@@ -1829,3 +1829,94 @@ header h1 {
 .song-list-mini strong {
     color: var(--text-primary);
 }
+
+/* Listening Display */
+.listening-display {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.note-detected {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.note-status {
+    color: var(--text-secondary);
+}
+
+.note-status.correct {
+    color: var(--success);
+}
+
+.note-status.incorrect {
+    color: var(--danger);
+}
+
+/* Note Match Animation */
+@keyframes noteMatch {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.note-match {
+    animation: noteMatch 0.3s ease;
+}
+
+/* Practice Mode with Detection */
+.practice-detection {
+    text-align: center;
+}
+
+.target-note-display {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 20px 0;
+}
+
+.target-note-display.correct {
+    color: var(--success);
+}
+
+.target-note-display.waiting {
+    color: var(--warning);
+}
+
+.detection-feedback {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 12px;
+    background: var(--bg-hover);
+}
+
+.detection-feedback.correct {
+    background: rgba(16, 185, 129, 0.2);
+    border: 2px solid var(--success);
+}
+
+.detection-feedback.incorrect {
+    background: rgba(239, 68, 68, 0.2);
+    border: 2px solid var(--danger);
+}
+
+.permission-request {
+    text-align: center;
+    padding: 40px;
+}
+
+.permission-request p {
+    margin: 15px 0;
+    color: var(--text-secondary);
+}
+
+.mic-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}

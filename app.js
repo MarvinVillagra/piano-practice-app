@@ -685,7 +685,10 @@ function generateScaleExercise() {
             <p><strong>Left Hand:</strong> ${scaleData.fingering.left}</p>
         </div>
         <p class="scale-tip">💡 ${scaleData.tips}</p>
-        <button class="btn-start" onclick="openScalePractice('${root}', '${type}')">Start Practice →</button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-start" onclick="openScalePractice('${root}', '${type}')">Practice →</button>
+            <button class="btn-start" onclick="startScalePracticeWithDetection('${type}', '${root}')" style="background: var(--success);">🎤 Listen & Check</button>
+        </div>
     `;
 }
 
@@ -2057,5 +2060,227 @@ function showFocusReminder(text) {
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initAdvancedFeatures, 200);
+});
+
+
+// ============== AUDIO DETECTION INTEGRATION ==============
+let noteDetector = null;
+let isListeningActive = false;
+
+function initAudioDetection() {
+    document.getElementById('start-listening')?.addEventListener('click', startListeningMode);
+    document.getElementById('stop-listening')?.addEventListener('click', stopListeningMode);
+}
+
+async function startListeningMode() {
+    if (!window.PianoNoteDetector) {
+        alert('Audio detection not available in this browser');
+        return;
+    }
+
+    noteDetector = new window.PianoNoteDetector();
+    
+    noteDetector.onNoteDetected = (noteInfo) => {
+        showDetectedNote(noteInfo);
+    };
+    
+    noteDetector.onNoNote = () => {
+        document.getElementById('note-detected').textContent = '—';
+        document.getElementById('note-status').textContent = 'Play a note...';
+        document.getElementById('note-status').className = 'note-status';
+    };
+
+    const success = await noteDetector.startListening();
+    
+    if (success) {
+        isListeningActive = true;
+        document.getElementById('start-listening').style.display = 'none';
+        document.getElementById('stop-listening').style.display = 'block';
+        document.getElementById('note-detected').textContent = '—';
+        document.getElementById('note-status').textContent = 'Listening... play a note';
+    } else {
+        alert('Could not access microphone. Please allow microphone permission.');
+    }
+}
+
+function stopListeningMode() {
+    if (noteDetector) {
+        noteDetector.stopListening();
+        noteDetector = null;
+    }
+    
+    isListeningActive = false;
+    document.getElementById('start-listening').style.display = 'block';
+    document.getElementById('stop-listening').style.display = 'none';
+    document.getElementById('note-detected').textContent = '—';
+    document.getElementById('note-status').textContent = 'Tap to start';
+}
+
+function showDetectedNote(noteInfo) {
+    const detectedEl = document.getElementById('note-detected');
+    const statusEl = document.getElementById('note-status');
+    
+    detectedEl.textContent = noteInfo.noteName;
+    detectedEl.classList.add('note-match');
+    setTimeout(() => detectedEl.classList.remove('note-match'), 300);
+    
+    statusEl.textContent = `Octave ${noteInfo.octave} • ${Math.round(noteInfo.frequency)}Hz`;
+    statusEl.className = 'note-status correct';
+}
+
+// ============== PRACTICE WITH DETECTION ==============
+let practiceDetector = null;
+
+function startPracticeWithDetection(notes, onProgress, onComplete) {
+    if (!window.PracticeWithDetection) {
+        alert('Practice detection not available');
+        return false;
+    }
+
+    practiceDetector = new window.PracticeWithDetection();
+    
+    practiceDetector.onProgress = onProgress;
+    practiceDetector.onComplete = onComplete;
+    
+    return practiceDetector.startPractice(notes);
+}
+
+function stopPracticeWithDetection() {
+    if (practiceDetector) {
+        practiceDetector.endPractice();
+        practiceDetector = null;
+    }
+}
+
+// Enhanced scale practice with detection
+function startScalePracticeWithDetection(scale, root) {
+    const scaleData = window.scales?.[scale]?.[root];
+    if (!scaleData) return;
+
+    const notes = scaleData.notes || scaleData;
+    const noteArray = Array.isArray(notes) ? notes : notes.up;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    let currentNote = 0;
+    let correctCount = 0;
+    
+    content.innerHTML = `
+        <div class="practice-detection">
+            <h3>🎵 Scale Practice with Detection</h3>
+            <p style="color: var(--text-secondary);">Play each note - the app will listen and check</p>
+            
+            <div class="target-note-display" id="target-note">${noteArray[0]}</div>
+            
+            <div class="detection-feedback" id="feedback">
+                <p>Play the note shown above</p>
+            </div>
+            
+            <div class="progress-dots" style="display: flex; gap: 5px; justify-content: center; margin: 15px 0;">
+                ${noteArray.map((n, i) => `<span class="dot" data-index="${i}" style="width: 20px; height: 20px; border-radius: 50%; background: var(--bg-hover);"></span>`).join('')}
+            </div>
+            
+            <p>Progress: <span id="correct-count">0</span> / ${noteArray.length}</p>
+            
+            <div class="drill-controls">
+                <button class="btn-start" id="start-detection">🎤 Start Listening</button>
+                <button class="btn-start" id="skip-note" style="background: var(--warning); display: none;">Skip Note</button>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+    
+    let detector = null;
+    
+    document.getElementById('start-detection').addEventListener('click', async function() {
+        this.disabled = true;
+        this.textContent = '🎤 Listening...';
+        document.getElementById('skip-note').style.display = 'inline-block';
+        
+        if (!window.PianoNoteDetector) {
+            alert('Detection not available');
+            return;
+        }
+        
+        detector = new window.PianoNoteDetector();
+        
+        detector.onNoteDetected = (noteInfo) => {
+            const target = noteArray[currentNote];
+            const isCorrect = noteInfo.noteName === target.replace(/\d/, '');
+            
+            const feedbackEl = document.getElementById('feedback');
+            const targetEl = document.getElementById('target-note');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (isCorrect) {
+                correctCount++;
+                document.getElementById('correct-count').textContent = correctCount;
+                dots[currentNote].style.background = 'var(--success)';
+                feedbackEl.innerHTML = '<p style="color: var(--success);">✓ Correct!</p>';
+                feedbackEl.className = 'detection-feedback correct';
+                targetEl.classList.add('correct');
+                
+                setTimeout(() => {
+                    currentNote++;
+                    if (currentNote < noteArray.length) {
+                        document.getElementById('target-note').textContent = noteArray[currentNote];
+                        targetEl.classList.remove('correct');
+                        feedbackEl.innerHTML = '<p>Play the next note</p>';
+                        feedbackEl.className = 'detection-feedback';
+                    } else {
+                        // Complete
+                        detector.stopListening();
+                        showPracticeComplete(correctCount, noteArray.length);
+                    }
+                }, 500);
+            } else {
+                feedbackEl.innerHTML = `<p style="color: var(--danger);">✗ You played ${noteInfo.noteName} - need ${target}</p>`;
+                feedbackEl.className = 'detection-feedback incorrect';
+                targetEl.classList.add('waiting');
+                setTimeout(() => targetEl.classList.remove('waiting'), 300);
+            }
+        };
+        
+        detector.onNoNote = () => {
+            // Silent
+        };
+        
+        await detector.startListening();
+    });
+    
+    document.getElementById('skip-note').addEventListener('click', () => {
+        currentNote++;
+        if (currentNote < noteArray.length) {
+            document.getElementById('target-note').textContent = noteArray[currentNote];
+            document.getElementById('feedback').innerHTML = '<p>Play the next note</p>';
+        } else {
+            if (detector) detector.stopListening();
+            showPracticeComplete(correctCount, noteArray.length);
+        }
+    });
+}
+
+function showPracticeComplete(correct, total) {
+    const content = document.getElementById('drill-content');
+    const percentage = Math.round((correct / total) * 100);
+    
+    addXP(correct * 5, 'Scale practice with detection');
+    
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">${percentage >= 80 ? '🎉' : percentage >= 60 ? '👍' : '💪'}</div>
+            <h2>Practice Complete!</h2>
+            <p style="font-size: 2rem; margin: 20px 0;">${correct} / ${total} correct</p>
+            <p style="color: var(--text-secondary);">${percentage}% accuracy</p>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')">Done</button>
+        </div>
+    `;
+}
+
+// Initialize audio detection on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initAudioDetection, 300);
 });
 
