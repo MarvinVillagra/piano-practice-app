@@ -2284,3 +2284,98 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initAudioDetection, 300);
 });
 
+
+// ============== DATABASE INTEGRATION ==============
+async function initAppWithDatabase() {
+    // Initialize database
+    if (window.initDatabase) {
+        await window.initDatabase();
+        
+        // Migrate old data
+        if (window.migrateFromLocalStorage) {
+            await window.migrateFromLocalStorage();
+        }
+        
+        // Load stats from database
+        await loadStatsFromDatabase();
+    }
+}
+
+async function loadStatsFromDatabase() {
+    if (!window.pianoDB) return;
+    
+    try {
+        const stats = await window.pianoDB.getStats();
+        
+        // Update UI
+        document.getElementById('home-streak').textContent = stats.streak || 0;
+        document.getElementById('total-practice-time').textContent = 
+            `${Math.floor(stats.totalPracticeMinutes / 60)}h ${stats.totalPracticeMinutes % 60}m`;
+        document.getElementById('drills-completed').textContent = stats.completedDrills || 0;
+        document.getElementById('scales-learned').textContent = stats.learnedScales || 0;
+        document.getElementById('songs-learned').textContent = stats.learnedSongs || 0;
+        document.getElementById('streak-count').textContent = stats.streak || 0;
+        
+        // Update XP display
+        const xpNeeded = (stats.level || 1) * 500;
+        document.getElementById('user-level').textContent = stats.level || 1;
+        document.getElementById('xp-fill').style.width = `${((stats.xp || 0) / xpNeeded) * 100}%`;
+        document.getElementById('xp-text').textContent = `${stats.xp || 0} / ${xpNeeded} XP`;
+        
+        // Mark completed items
+        const completedDrills = await window.pianoDB.getCompletedDrills();
+        completedDrills.forEach(d => {
+            const el = document.querySelector(`[data-drill-id="${d.drillId}"]`);
+            if (el) el.classList.add('completed');
+        });
+        
+        const learnedScales = await window.pianoDB.getLearnedScales();
+        learnedScales.forEach(s => {
+            state.learnedScales.push(s.scaleKey);
+        });
+        
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+// Override logPractice to use database
+const originalLogPractice = logPractice;
+logPractice = async function(activity) {
+    // Call original
+    originalLogPractice(activity);
+    
+    // Save to database
+    if (window.pianoDB) {
+        try {
+            await window.pianoDB.recordProgress('practice', activity, { duration: 5 });
+            await window.pianoDB.updateStreak();
+        } catch (error) {
+            console.error('Database error:', error);
+        }
+    }
+};
+
+// Override addXP to use database
+const originalAddXP = addXP;
+addXP = async function(amount, reason) {
+    // Call original if exists
+    if (originalAddXP) {
+        originalAddXP(amount, reason);
+    }
+    
+    // Save to database
+    if (window.pianoDB) {
+        try {
+            await window.pianoDB.addXP(amount, reason);
+        } catch (error) {
+            console.error('Database error:', error);
+        }
+    }
+};
+
+// Initialize database on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initAppWithDatabase, 100);
+});
+
