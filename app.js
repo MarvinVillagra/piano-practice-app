@@ -985,3 +985,392 @@ function initModals() {
         });
     });
 }
+
+// ============== HOME SECTION ==============
+function initHome() {
+    updateHomeStats();
+    generatePracticePlan();
+    renderAchievements();
+    
+    document.getElementById('start-practice')?.addEventListener('click', startPracticeSession);
+    
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            if (action === 'drills') showSection('drills');
+            else if (action === 'scales') showSection('scales');
+            else if (action === 'sight-reading') openSightReading();
+            else if (action === 'ear-training') openEarTraining();
+        });
+    });
+}
+
+function updateHomeStats() {
+    const streak = state.streak || 0;
+    const today = new Date().toDateString();
+    const todayMinutes = state.practiceLog
+        .filter(e => new Date(e.timestamp).toDateString() === today)
+        .reduce((acc, e) => acc + (e.duration || 5), 0);
+    
+    document.getElementById('home-streak').textContent = streak;
+    document.getElementById('home-time').textContent = todayMinutes + 'm';
+    
+    const totalMinutes = state.practiceLog.reduce((acc, e) => acc + (e.duration || 5), 0);
+    document.getElementById('home-xp').textContent = totalMinutes * 10;
+    
+    // Update goal
+    const goalMinutes = 30;
+    const progress = Math.min(100, (todayMinutes / goalMinutes) * 100);
+    document.getElementById('goal-fill').style.width = progress + '%';
+    document.getElementById('goal-text').textContent = `${todayMinutes} / ${goalMinutes} minutes`;
+}
+
+function generatePracticePlan() {
+    const planList = document.getElementById('plan-list');
+    if (!planList) return;
+    
+    const plan = window.practicePlanner?.createSession(30, 'balanced') || [];
+    planList.innerHTML = plan.map(item => `
+        <div class="plan-item">
+            <span class="plan-name">${item.name}</span>
+            <span class="plan-time">${item.minutes} min</span>
+        </div>
+    `).join('');
+}
+
+function renderAchievements() {
+    const unlockedIds = JSON.parse(localStorage.getItem('achievements') || '[]');
+    
+    // Recent achievements on home
+    const row = document.getElementById('achievement-row');
+    if (row) {
+        const recent = unlockedIds.slice(-3);
+        if (recent.length === 0) {
+            row.innerHTML = '<p style="color: var(--text-secondary)">Practice more to unlock achievements!</p>';
+        } else {
+            row.innerHTML = recent.map(id => {
+                const a = window.achievements?.find(ach => ach.id === id);
+                return a ? `<div class="achievement-badge unlocked"><span>${a.icon}</span> ${a.name}</div>` : '';
+            }).join('');
+        }
+    }
+    
+    // Full achievement grid
+    const grid = document.getElementById('achievement-grid');
+    if (grid && window.achievements) {
+        grid.innerHTML = window.achievements.map(a => `
+            <div class="achievement-item ${unlockedIds.includes(a.id) ? '' : 'locked'}">
+                <div class="achievement-icon">${a.icon}</div>
+                <div class="achievement-name">${a.name}</div>
+            </div>
+        `).join('');
+    }
+}
+
+// ============== METRONOME ==============
+let metronome = null;
+
+function initMetronome() {
+    if (!window.Metronome) return;
+    
+    metronome = new window.Metronome();
+    
+    const slider = document.getElementById('tempo-slider');
+    const bpmDisplay = document.getElementById('bpm-display');
+    const toggleBtn = document.getElementById('toggle-metronome');
+    
+    slider?.addEventListener('input', () => {
+        const bpm = parseInt(slider.value);
+        metronome.setBPM(bpm);
+        bpmDisplay.textContent = bpm;
+    });
+    
+    toggleBtn?.addEventListener('click', () => {
+        if (metronome.isPlaying) {
+            metronome.stop();
+            toggleBtn.textContent = '▶️ Start';
+            toggleBtn.classList.remove('playing');
+            clearBeatIndicator();
+        } else {
+            metronome.start();
+            toggleBtn.textContent = '⏹️ Stop';
+            toggleBtn.classList.add('playing');
+            startBeatIndicator();
+        }
+    });
+    
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            metronome.setBeatsPerMeasure(parseInt(btn.dataset.beats));
+        });
+    });
+}
+
+function startBeatIndicator() {
+    const dots = document.querySelectorAll('.beat-dot');
+    let beat = 0;
+    
+    const interval = setInterval(() => {
+        if (!metronome?.isPlaying) {
+            clearInterval(interval);
+            return;
+        }
+        
+        dots.forEach((dot, i) => {
+            dot.classList.remove('active', 'accent');
+            if (i === beat) {
+                dot.classList.add('active');
+                if (beat === 0) dot.classList.add('accent');
+            }
+        });
+        
+        beat = (beat + 1) % metronome.beatsPerMeasure;
+    }, 60000 / metronome.bpm);
+}
+
+function clearBeatIndicator() {
+    document.querySelectorAll('.beat-dot').forEach(dot => {
+        dot.classList.remove('active', 'accent');
+    });
+}
+
+// ============== EAR TRAINING ==============
+function openEarTraining() {
+    showSection('tools');
+    setTimeout(() => {
+        document.getElementById('ear-type').value = 'intervals';
+        document.getElementById('ear-level').value = 'beginner';
+    }, 100);
+}
+
+function initEarTraining() {
+    let currentExercise = null;
+    
+    document.getElementById('play-example')?.addEventListener('click', () => {
+        const type = document.getElementById('ear-type')?.value || 'intervals';
+        const level = document.getElementById('ear-level')?.value || 'beginner';
+        
+        const exercises = window.earTrainingExercises?.[type]?.[level] || [];
+        if (exercises.length === 0) return;
+        
+        currentExercise = exercises[Math.floor(Math.random() * exercises.length)];
+        
+        const display = document.getElementById('ear-display');
+        display.innerHTML = `<p style="font-size: 1.2rem">🔊 Listen and identify...</p>`;
+        
+        // Play the interval/chord (using Web Audio)
+        playEarExample(currentExercise);
+    });
+    
+    document.getElementById('show-answer')?.addEventListener('click', () => {
+        if (!currentExercise) return;
+        
+        const display = document.getElementById('ear-display');
+        display.innerHTML = `
+            <div>
+                <p style="font-size: 1.5rem; font-weight: 600">${currentExercise.name}</p>
+                <p style="color: var(--text-secondary)">${currentExercise.example}</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem">${currentExercise.description}</p>
+            </div>
+        `;
+    });
+}
+
+function playEarExample(exercise) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = exercise.notes;
+    
+    notes.forEach((note, i) => {
+        const freq = noteToFreq(note);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        
+        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.5);
+        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.5 + 0.05);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.5 + 0.8);
+        
+        osc.start(ctx.currentTime + i * 0.5);
+        osc.stop(ctx.currentTime + i * 0.5 + 1);
+    });
+}
+
+function noteToFreq(note) {
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    let name = note.replace(/\d/, '');
+    let octave = parseInt(note.match(/\d/)?.[0] || 4);
+    
+    const semitone = notes.indexOf(name);
+    return 440 * Math.pow(2, (semitone - 9 + (octave - 4) * 12) / 12);
+}
+
+// ============== THEORY ==============
+function initTheory() {
+    const container = document.getElementById('theory-lessons');
+    if (!container || !window.theoryLessons) return;
+    
+    container.innerHTML = window.theoryLessons.map(lesson => `
+        <div class="theory-lesson-card" data-lesson-id="${lesson.id}">
+            <h4>${lesson.title}<span class="lesson-level ${lesson.level}">${lesson.level}</span></h4>
+            <p>${lesson.sections.length} sections</p>
+        </div>
+    `).join('');
+    
+    container.querySelectorAll('.theory-lesson-card').forEach(card => {
+        card.addEventListener('click', () => openTheoryLesson(card.dataset.lessonId));
+    });
+}
+
+function openTheoryLesson(lessonId) {
+    const lesson = window.theoryLessons?.find(l => l.id === lessonId);
+    if (!lesson) return;
+    
+    let currentSection = 0;
+    let currentQuestion = 0;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    function renderSection() {
+        const section = lesson.sections[currentSection];
+        
+        content.innerHTML = `
+            <div class="theory-practice">
+                <h3>${lesson.title}</h3>
+                <div class="step-progress">
+                    Section ${currentSection + 1} of ${lesson.sections.length}: ${section.title}
+                </div>
+                <div class="theory-content">
+                    <p>${section.content}</p>
+                </div>
+                ${section.exercise ? renderQuiz(section) : ''}
+                <div class="drill-controls">
+                    ${currentSection > 0 ? '<button class="btn-prev" onclick="prevTheorySection()">← Previous</button>' : ''}
+                    <button class="btn-start" onclick="nextTheorySection()">Next Section →</button>
+                </div>
+            </div>
+        `;
+    }
+    
+    window.nextTheorySection = () => {
+        currentSection++;
+        if (currentSection >= lesson.sections.length) {
+            logPractice(`Completed theory: ${lesson.title}`);
+            renderProgress();
+            modal.classList.remove('active');
+        } else {
+            renderSection();
+        }
+    };
+    
+    window.prevTheorySection = () => {
+        if (currentSection > 0) {
+            currentSection--;
+            renderSection();
+        }
+    };
+    
+    modal.classList.add('active');
+    renderSection();
+}
+
+function renderQuiz(section) {
+    if (!section.questions || section.questions.length === 0) return '';
+    
+    return `
+        <div class="quiz-section">
+            <h4>Quiz</h4>
+            <div class="quiz-question">
+                ${section.questions[0].question || 'Identify:'}
+            </div>
+            <div class="quiz-options">
+                ${(section.questions[0].options || []).map(opt => `
+                    <button class="quiz-option" onclick="checkQuizAnswer(this, '${opt}', '${section.questions[0].answer}')">${opt}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+window.checkQuizAnswer = (btn, selected, correct) => {
+    if (selected === correct) {
+        btn.style.background = 'var(--success)';
+    } else {
+        btn.style.background = 'var(--danger)';
+    }
+};
+
+// ============== SESSION TRACKING ==============
+let sessionInterval = null;
+let sessionStartTime = null;
+
+function startPracticeSession() {
+    sessionStartTime = Date.now();
+    document.getElementById('session-indicator').style.display = 'flex';
+    
+    sessionInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        document.getElementById('session-time').textContent = 
+            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+    
+    showSection('drills');
+}
+
+function endPracticeSession() {
+    if (!sessionStartTime) return;
+    
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000 / 60) || 5;
+    logPractice(`Practice session: ${elapsed} minutes`);
+    
+    clearInterval(sessionInterval);
+    sessionInterval = null;
+    sessionStartTime = null;
+    
+    document.getElementById('session-indicator').style.display = 'none';
+    updateHomeStats();
+    renderProgress();
+    
+    // Check for new achievements
+    const newAchievements = window.checkAchievements?.(state) || [];
+    if (newAchievements.length > 0) {
+        alert(`🎉 New Achievement${newAchievements.length > 1 ? 's' : ''} unlocked!`);
+        renderAchievements();
+    }
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === sectionId);
+    });
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.toggle('active', s.id === sectionId);
+    });
+}
+
+// ============== INIT ==============
+document.addEventListener('DOMContentLoaded', () => {
+    initNav();
+    renderDrills();
+    renderSongs();
+    renderProgress();
+    initScaleControls();
+    renderPiano();
+    initModals();
+    initHome();
+    initMetronome();
+    initEarTraining();
+    initTheory();
+    
+    document.getElementById('end-session')?.addEventListener('click', endPracticeSession);
+});
+
