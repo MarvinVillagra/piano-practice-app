@@ -2613,3 +2613,241 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initScaleLearning, 200);
 });
 
+
+// ============== SYNC & SETTINGS UI ==============
+function updateSyncStatus() {
+    const dot = document.getElementById('sync-dot');
+    const text = document.getElementById('sync-status-text');
+    const userIdEl = document.getElementById('user-id');
+    const lastSyncEl = document.getElementById('last-sync');
+    
+    if (!dot) return; // Not on settings page
+    
+    if (window.cloudSync) {
+        const status = window.cloudSync.getSyncStatus();
+        
+        // Update dot
+        dot.classList.remove('online', 'offline', 'syncing');
+        if (status.isOnline) {
+            dot.classList.add('online');
+            text.textContent = status.isAuthenticated ? 'Connected' : 'Connecting...';
+        } else {
+            dot.classList.add('offline');
+            text.textContent = 'Offline - changes queued';
+        }
+        
+        // Update user ID
+        if (status.userId) {
+            userIdEl.textContent = status.userId.substring(0, 8) + '...';
+        }
+        
+        // Update last sync
+        if (status.lastSync) {
+            const ago = Math.floor((Date.now() - status.lastSync) / 1000 / 60);
+            lastSyncEl.textContent = ago < 1 ? 'Just now' : `${ago}m ago`;
+        }
+    } else {
+        dot.classList.add('offline');
+        text.textContent = 'Local storage only';
+        userIdEl.textContent = 'Not synced';
+    }
+}
+
+// Export progress
+async function exportProgress() {
+    try {
+        let data;
+        if (window.cloudSync) {
+            data = await window.cloudSync.exportToJSON();
+        } else if (window.pianoDB) {
+            data = JSON.stringify(await window.pianoDB.exportData(), null, 2);
+        } else {
+            // Fallback to localStorage
+            data = JSON.stringify({
+                completedDrills: JSON.parse(localStorage.getItem('completedDrills') || '[]'),
+                learnedScales: JSON.parse(localStorage.getItem('learnedScales') || '[]'),
+                achievements: JSON.parse(localStorage.getItem('achievements') || '[]'),
+                total_xp: localStorage.getItem('total_xp') || 0,
+                streak: localStorage.getItem('streak') || 0
+            }, null, 2);
+        }
+        
+        // Create download
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `piano-progress-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('Progress exported successfully!', 'success');
+    } catch (error) {
+        console.error('Export failed:', error);
+        showToast('Export failed', 'error');
+    }
+}
+
+// Import progress
+function setupImport() {
+    const importBtn = document.getElementById('import-btn');
+    const fileInput = document.getElementById('import-file');
+    
+    if (importBtn && fileInput) {
+        importBtn.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+                const text = await file.text();
+                
+                if (window.cloudSync) {
+                    await window.cloudSync.importFromJSON(text);
+                } else if (window.pianoDB) {
+                    await window.pianoDB.importData(JSON.parse(text));
+                }
+                
+                // Reload stats
+                if (typeof loadStatsFromDatabase === 'function') {
+                    await loadStatsFromDatabase();
+                }
+                
+                showToast('Progress imported successfully!', 'success');
+            } catch (error) {
+                console.error('Import failed:', error);
+                showToast('Import failed - invalid file', 'error');
+            }
+        });
+    }
+}
+
+// Link email account
+function setupAccountLinking() {
+    const emailBtn = document.getElementById('link-email-btn');
+    const googleBtn = document.getElementById('link-google-btn');
+    
+    if (emailBtn) {
+        emailBtn.addEventListener('click', () => {
+            const email = prompt('Enter your email:');
+            const password = prompt('Create a password (min 6 characters):');
+            
+            if (email && password && window.cloudSync) {
+                window.cloudSync.linkWithEmail(email, password)
+                    .then(() => showToast('Account linked!', 'success'))
+                    .catch(err => {
+                        if (err.code === 'auth/email-already-in-use') {
+                            showToast('Email already in use. Please sign in.', 'warning');
+                        } else {
+                            showToast('Error: ' + err.message, 'error');
+                        }
+                    });
+            }
+        });
+    }
+    
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            if (window.cloudSync) {
+                window.cloudSync.linkWithGoogle()
+                    .then(() => showToast('Google account linked!', 'success'))
+                    .catch(err => showToast('Error: ' + err.message, 'error'));
+            }
+        });
+    }
+}
+
+// Clear data
+function setupDataClearing() {
+    const clearBtn = document.getElementById('clear-data-btn');
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', async () => {
+            if (!confirm('⚠️ This will delete ALL your progress. Are you sure?')) return;
+            if (!confirm('This cannot be undone. Continue?')) return;
+            
+            try {
+                // Clear IndexedDB
+                if (window.pianoDB) {
+                    const stores = ['userProfile', 'progress', 'completedDrills', 'learnedScales', 
+                                   'learnedSongs', 'practiceSessions', 'achievements', 'xpLog',
+                                   'spacedRepetition', 'theoryProgress', 'detectionHistory'];
+                    for (const store of stores) {
+                        await window.pianoDB.clear(store);
+                    }
+                }
+                
+                // Clear localStorage
+                localStorage.clear();
+                
+                showToast('All data cleared', 'warning');
+                setTimeout(() => location.reload(), 1000);
+            } catch (error) {
+                console.error('Clear failed:', error);
+                showToast('Failed to clear data', 'error');
+            }
+        });
+    }
+}
+
+// Manual sync
+function setupSyncButton() {
+    const syncBtn = document.getElementById('sync-now-btn');
+    
+    if (syncBtn) {
+        syncBtn.addEventListener('click', async () => {
+            syncBtn.textContent = '⏳ Syncing...';
+            syncBtn.disabled = true;
+            
+            if (window.cloudSync) {
+                await window.cloudSync.syncFromCloud();
+            }
+            
+            setTimeout(() => {
+                syncBtn.textContent = '🔄 Sync Now';
+                syncBtn.disabled = false;
+                updateSyncStatus();
+                showToast('Synced!', 'success');
+            }, 1000);
+        });
+    }
+}
+
+// Initialize settings UI
+function initSettingsUI() {
+    updateSyncStatus();
+    setupImport();
+    setupAccountLinking();
+    setupDataClearing();
+    setupSyncButton();
+    
+    // Update status periodically
+    setInterval(updateSyncStatus, 30000);
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? 'var(--success)' : type === 'error' ? '#dc3545' : type === 'warning' ? 'var(--warning)' : 'var(--primary)'};
+        color: white;
+        border-radius: 10px;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initSettingsUI, 500);
+});
+
