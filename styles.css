@@ -149,6 +149,7 @@ header h1 {
 
 .drill-item:hover {
     background: var(--primary);
+    transform: translateX(4px);
 }
 
 .drill-item.completed {
@@ -167,6 +168,139 @@ header h1 {
 
 .drill-status {
     font-size: 1.2rem;
+}
+
+/* Step Progress */
+.step-progress {
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--bg-hover);
+    border-radius: 10px;
+}
+
+.progress-bar {
+    height: 6px;
+    background: var(--bg-card);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Step Instruction */
+.step-instruction {
+    font-size: 1.1rem;
+    padding: 20px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin: 20px 0;
+    border-left: 4px solid var(--primary);
+}
+
+.instruction-text {
+    line-height: 1.6;
+}
+
+/* Metronome Hint */
+.metronome-hint {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 10px 0;
+}
+
+/* Scale Steps */
+.scale-steps {
+    text-align: left;
+    margin: 20px 0;
+}
+
+.scale-steps ol {
+    margin-left: 20px;
+}
+
+.scale-steps li {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+.scale-fingering {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.scale-fingering p {
+    margin: 8px 0;
+}
+
+.scale-tip {
+    background: rgba(99, 102, 241, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.scale-tip-box {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    border-left: 4px solid var(--accent);
+}
+
+/* Notes Display */
+.notes-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.hand-notes {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.hand-notes h4 {
+    margin-bottom: 10px;
+    color: var(--primary);
+}
+
+.note-flow {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Button States */
+.btn-start:disabled, .btn-prev:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-next, .btn-prev {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-next:hover:not(:disabled), .btn-prev:hover:not(:disabled) {
+    background: var(--primary);
+}
+
+.btn-prev {
+    background: transparent;
+    border: 1px solid var(--bg-hover);
 }
 
 /* Scale Controls */
