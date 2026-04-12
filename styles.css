@@ -1651,3 +1651,181 @@ header h1 {
         text-align: center;
     }
 }
+
+/* Chord Shortcuts Section */
+.chord-shortcuts {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.chord-shortcuts p {
+    color: var(--text-secondary);
+    margin: 8px 0 15px;
+}
+
+.progression-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.progression-card {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.progression-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.progression-card h4 {
+    margin-bottom: 8px;
+    color: var(--primary);
+}
+
+.progression-chords {
+    font-family: monospace;
+    font-size: 1.1rem;
+    margin: 8px 0;
+}
+
+.progression-songs {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.progression-time {
+    display: inline-block;
+    background: var(--success);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-top: 8px;
+}
+
+/* Flow State Indicator */
+.flow-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.flow-indicator.active {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flow-emoji {
+    font-size: 1.5rem;
+}
+
+.flow-text {
+    font-size: 0.85rem;
+}
+
+.flow-score-mini {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Focus Reminder */
+.focus-reminder {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+}
+
+.focus-reminder.show {
+    opacity: 1;
+}
+
+/* Quick Chord Learning Modal */
+.chord-learning {
+    text-align: center;
+}
+
+.chord-diagram {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.chord-name-large {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.chord-notes-display {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.chord-tips {
+    background: rgba(99, 102, 241, 0.1);
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.finger-guide {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.finger-num {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.finger-num span:first-child {
+    width: 30px;
+    height: 30px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Popular Progression Display */
+.song-list-mini {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 10px;
+}
+
+.song-list-mini strong {
+    color: var(--text-primary);
+}

@@ -1808,3 +1808,254 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initFastLearning, 100);
 });
 
+
+// ============== ADVANCED FEATURES INTEGRATION ==============
+let flowTracker = null;
+
+function initAdvancedFeatures() {
+    if (window.FlowStateTracker) {
+        flowTracker = new window.FlowStateTracker();
+    }
+    
+    renderChordProgressions();
+    initChordLearning();
+    showRandomFocusReminder();
+}
+
+function renderChordProgressions() {
+    const container = document.getElementById('progression-cards');
+    if (!container || !window.chordProgressions) return;
+    
+    const progs = Object.entries(window.chordProgressions).slice(0, 4);
+    
+    container.innerHTML = progs.map(([key, prog]) => `
+        <div class="progression-card" data-prog="${key}">
+            <h4>${prog.name}</h4>
+            <div class="progression-chords">${prog.keyOfC?.join(' → ') || prog.progression.join(' → ')}</div>
+            <div class="progression-songs">${prog.songs?.slice(0, 2).join(', ')}</div>
+            <span class="progression-time">${prog.learnTime || 'Quick learn'}</span>
+        </div>
+    `).join('');
+    
+    container.querySelectorAll('.progression-card').forEach(card => {
+        card.addEventListener('click', () => openProgressionLesson(card.dataset.prog));
+    });
+}
+
+function openProgressionLesson(progKey) {
+    const prog = window.chordProgressions?.[progKey];
+    if (!prog) return;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    content.innerHTML = `
+        <div class="progression-lesson">
+            <h3>${prog.name}</h3>
+            <p style="color: var(--text-secondary); margin: 10px 0;">${prog.description}</p>
+            
+            <div class="chord-flow" style="display: flex; gap: 10px; justify-content: center; margin: 20px 0;">
+                ${prog.keyOfC.map(chord => `
+                    <div class="chord-block" style="background: var(--bg-hover); padding: 15px 25px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600;">${chord}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="song-list-mini" style="margin: 20px 0;">
+                <strong>Songs you can play:</strong><br>
+                ${prog.songs.join('<br>')}
+            </div>
+            
+            <div style="background: var(--bg-hover); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                <h4>Practice Steps:</h4>
+                <ol style="margin-top: 10px; line-height: 1.8;">
+                    <li>Play left hand only: ${prog.keyOfC.join(' → ')}</li>
+                    <li>Add right hand melody or rhythm</li>
+                    <li>Practice transitioning smoothly between chords</li>
+                    <li>Try with different songs above</li>
+                </ol>
+            </div>
+            
+            <div class="drill-controls">
+                <button class="btn-start" onclick="startProgressionPractice('${progKey}')">Start Practice</button>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+window.startProgressionPractice = (progKey) => {
+    const prog = window.chordProgressions?.[progKey];
+    if (!prog) return;
+    
+    let currentChord = 0;
+    const chords = prog.keyOfC;
+    const timing = prog.chordTiming || chords.map(c => ({ chord: c, beats: 4 }));
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    function renderChord() {
+        const chord = timing[currentChord];
+        if (!chord) {
+            completeProgression(prog);
+            return;
+        }
+        
+        content.innerHTML = `
+            <div class="chord-learning">
+                <p style="color: var(--text-secondary)">Chord ${currentChord + 1} of ${timing.length}</p>
+                <div class="chord-diagram">
+                    <div class="chord-name-large">${chord.chord}</div>
+                    <div class="chord-notes-display">${getChordNotes(chord.chord)}</div>
+                </div>
+                <p>Play for <strong>${chord.beats} beats</strong></p>
+                <div class="drill-controls">
+                    <button class="btn-start" id="next-chord">Next Chord →</button>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 15px;">
+                    ${window.quickChordLearning?.chords?.[chord.chord]?.tips || 'Focus on smooth transitions'}
+                </p>
+            </div>
+        `;
+        
+        document.getElementById('next-chord').addEventListener('click', () => {
+            addXP(5, `Chord: ${chord.chord}`);
+            currentChord++;
+            renderChord();
+        });
+    }
+    
+    renderChord();
+};
+
+function getChordNotes(chordName) {
+    const chords = window.quickChordLearning?.chords || {};
+    const cleanName = chordName.replace(/[0-9]/g, '');
+    return chords[cleanName]?.notes?.join(' - ') || chordName;
+}
+
+function completeProgression(prog) {
+    addXP(30, `Learned progression: ${prog.name}`);
+    logPractice(`Learned: ${prog.name}`);
+    
+    const content = document.getElementById('drill-content');
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🎸</div>
+            <h2>Progression Mastered!</h2>
+            <p style="color: var(--text-secondary); margin: 15px 0;">You can now play ${prog.songs?.length || 'many'} songs!</p>
+            <p style="margin-top: 10px;">Songs: ${prog.songs?.slice(0, 3).join(', ')}</p>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')">Done</button>
+        </div>
+    `;
+}
+
+function initChordLearning() {
+    document.getElementById('start-chord-learning')?.addEventListener('click', startQuickChordLearning);
+}
+
+function startQuickChordLearning() {
+    const sequence = window.quickChordLearning?.getSequence() || [];
+    const learned = JSON.parse(localStorage.getItem('learned_chords') || '[]');
+    
+    let current = 0;
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    function renderChord() {
+        const chord = sequence[current];
+        if (!chord) {
+            showChordComplete();
+            return;
+        }
+        
+        content.innerHTML = `
+            <div class="chord-learning">
+                <p style="color: var(--text-secondary)">Chord ${current + 1} of ${sequence.length}</p>
+                <div class="chord-diagram">
+                    <div class="chord-name-large">${chord.name}</div>
+                    <div class="chord-notes-display">${chord.notes.join(' - ')}</div>
+                    <div class="finger-guide">
+                        ${chord.fingers.map((f, i) => `
+                            <div class="finger-num">
+                                <span>${f}</span>
+                                <span>${chord.notes[i]}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="chord-tips">💡 ${chord.tips}</div>
+                <p style="margin-top: 15px; color: var(--text-secondary);">Difficulty: ${'⭐'.repeat(chord.difficulty)}</p>
+                <div class="drill-controls">
+                    <button class="btn-start" id="learned-chord">Got It! →</button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('learned-chord').addEventListener('click', () => {
+            if (!learned.includes(chord.name)) {
+                learned.push(chord.name);
+                localStorage.setItem('learned_chords', JSON.stringify(learned));
+            }
+            addXP(10, `Learned chord: ${chord.name}`);
+            current++;
+            renderChord();
+        });
+    }
+    
+    modal.classList.add('active');
+    renderChord();
+}
+
+function showChordComplete() {
+    const learned = JSON.parse(localStorage.getItem('learned_chords') || '[]');
+    const content = document.getElementById('drill-content');
+    
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🎹</div>
+            <h2>Chords Learned!</h2>
+            <p style="color: var(--text-secondary); margin: 15px 0;">You now know ${learned.length} chords</p>
+            <p style="font-size: 1.2rem;">${learned.join(' - ')}</p>
+            <p style="margin-top: 20px; color: var(--success);">You can play hundreds of songs with these!</p>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')">Done</button>
+        </div>
+    `;
+}
+
+function showRandomFocusReminder() {
+    // Show a focus reminder every 3 minutes during practice
+    setInterval(() => {
+        if (sessionStartTime) {
+            const reminder = window.getRandomFocusReminder?.();
+            if (reminder) {
+                showFocusReminder(reminder);
+            }
+        }
+    }, 180000); // 3 minutes
+}
+
+function showFocusReminder(text) {
+    let el = document.querySelector('.focus-reminder');
+    if (!el) {
+        el = document.createElement('div');
+        el.className = 'focus-reminder';
+        document.body.appendChild(el);
+    }
+    
+    el.textContent = text;
+    el.classList.add('show');
+    
+    setTimeout(() => {
+        el.classList.remove('show');
+    }, 5000);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initAdvancedFeatures, 200);
+});
+
