@@ -1328,3 +1328,326 @@ header h1 {
         min-width: 80px;
     }
 }
+
+/* Daily Missions */
+.daily-missions {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mission-list {
+    margin-top: 12px;
+}
+
+.mission-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-hover);
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.mission-item.completed {
+    border-left: 4px solid var(--success);
+}
+
+.mission-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mission-item.completed .mission-check {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.mission-check::after {
+    content: '✓';
+    color: white;
+    display: none;
+}
+
+.mission-item.completed .mission-check::after {
+    display: block;
+}
+
+.mission-info {
+    flex: 1;
+}
+
+.mission-name {
+    font-weight: 600;
+}
+
+.mission-task {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.mission-xp {
+    background: var(--primary);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+/* XP Display */
+.xp-display {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.xp-display h3 {
+    margin-bottom: 10px;
+}
+
+.xp-bar {
+    height: 12px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+.xp-fill {
+    height: 100%;
+    background: white;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+/* Review Queue */
+.review-queue {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.review-count {
+    color: var(--text-secondary);
+    margin: 10px 0;
+}
+
+/* Fast Track Section */
+.track-overview {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.current-week {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.current-week h3 {
+    margin-bottom: 8px;
+}
+
+.week-goals {
+    display: grid;
+    gap: 10px;
+}
+
+.goal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-hover);
+    border-radius: 10px;
+}
+
+.goal-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--text-secondary);
+}
+
+.goal-check.done {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+/* Micro Sessions */
+.micro-sessions {
+    margin-bottom: 25px;
+}
+
+.session-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 12px;
+}
+
+.session-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.session-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.session-time {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.session-name {
+    display: block;
+    font-size: 1.2rem;
+    margin: 8px 0;
+}
+
+.session-card p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Speed Drills */
+.speed-drills-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.drill-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.speed-card {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.speed-card:hover {
+    background: var(--primary);
+}
+
+.speed-card h4 {
+    margin-bottom: 5px;
+}
+
+.speed-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Assessment */
+.assessment-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+}
+
+.assessment-section p {
+    color: var(--text-secondary);
+    margin: 10px 0 15px;
+}
+
+/* Assessment Modal */
+.assessment-question {
+    text-align: center;
+    padding: 20px;
+}
+
+.assessment-question h4 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.answer-options {
+    display: grid;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.answer-btn {
+    padding: 15px;
+    background: var(--bg-hover);
+    border: none;
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.answer-btn:hover {
+    background: var(--primary);
+}
+
+.answer-btn.selected {
+    background: var(--primary);
+}
+
+/* Streak Bonus Display */
+.streak-bonus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.streak-bonus .multiplier {
+    color: var(--success);
+    font-weight: 600;
+}
+
+/* Level Up Animation */
+@keyframes levelUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.level-up {
+    animation: levelUp 0.5s ease;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .session-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .micro-sessions h3 {
+        text-align: center;
+    }
+}

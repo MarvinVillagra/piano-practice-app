@@ -1374,3 +1374,437 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('end-session')?.addEventListener('click', endPracticeSession);
 });
 
+
+// ============== FAST LEARNING INTEGRATION ==============
+let xpSystem = null;
+let spacedRepetition = null;
+
+function initFastLearning() {
+    if (window.XPSystem) {
+        xpSystem = new window.XPSystem();
+        updateXPDisplay();
+    }
+    
+    if (window.SpacedRepetition) {
+        spacedRepetition = new window.SpacedRepetition();
+        updateReviewQueue();
+    }
+    
+    renderDailyMissions();
+    renderSpeedDrills();
+    initMicroSessions();
+    initAssessment();
+    renderFastTrack();
+}
+
+function updateXPDisplay() {
+    if (!xpSystem) return;
+    const stats = xpSystem.getStats();
+    document.getElementById('user-level').textContent = stats.level;
+    document.getElementById('xp-fill').style.width = (stats.progress * 100) + '%';
+    document.getElementById('xp-text').textContent = `${xpSystem.xp} / ${stats.level * 500} XP`;
+}
+
+function addXP(amount, reason) {
+    if (!xpSystem) return;
+    const result = xpSystem.addXP(amount, reason);
+    updateXPDisplay();
+    
+    // Apply streak bonus
+    const streakBonus = window.getStreakBonus?.(state.streak);
+    if (streakBonus && streakBonus.multiplier > 1) {
+        const bonusXP = Math.round(amount * (streakBonus.multiplier - 1));
+        xpSystem.addXP(bonusXP, 'Streak bonus');
+        updateXPDisplay();
+    }
+    
+    if (result.leveledUp) {
+        showLevelUp(result.newLevel);
+    }
+    
+    return result;
+}
+
+function showLevelUp(level) {
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    content.innerHTML = `
+        <div class="level-up-celebration" style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+            <h2 style="font-size: 2rem; margin-bottom: 10px;">Level Up!</h2>
+            <p style="font-size: 1.5rem; color: var(--primary);">You've reached Level ${level}</p>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')" style="margin-top: 20px;">Continue</button>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+function updateReviewQueue() {
+    if (!spacedRepetition) return;
+    const stats = spacedRepetition.getStats();
+    document.getElementById('due-count').textContent = stats.due;
+    
+    if (stats.due === 0) {
+        document.getElementById('start-review').disabled = true;
+    }
+}
+
+function renderDailyMissions() {
+    const container = document.getElementById('mission-list');
+    if (!container || !window.getTodaysMissions) return;
+    
+    const missions = window.getTodaysMissions();
+    const progress = JSON.parse(localStorage.getItem('mission_progress') || '{}');
+    const today = new Date().toDateString();
+    
+    // Reset if new day
+    if (progress.date !== today) {
+        localStorage.setItem('mission_progress', JSON.stringify({ date: today }));
+    }
+    
+    container.innerHTML = missions.map(mission => {
+        const done = progress[mission.id] === true;
+        return `
+            <div class="mission-item ${done ? 'completed' : ''}" data-mission-id="${mission.id}">
+                <div class="mission-check"></div>
+                <div class="mission-info">
+                    <span class="mission-name">${mission.name}</span>
+                    <span class="mission-task">${mission.task}</span>
+                </div>
+                <span class="mission-xp">${mission.xp} XP</span>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('start-review')?.addEventListener('click', startSpacedReview);
+}
+
+function completeMission(missionId) {
+    const mission = window.dailyMissions?.find(m => m.id === missionId);
+    if (!mission) return;
+    
+    const progress = JSON.parse(localStorage.getItem('mission_progress') || '{}');
+    if (progress[missionId]) return; // Already completed
+    
+    progress[missionId] = true;
+    localStorage.setItem('mission_progress', JSON.stringify(progress));
+    
+    addXP(mission.xp, `Mission: ${mission.name}`);
+    renderDailyMissions();
+}
+
+function renderSpeedDrills() {
+    const container = document.getElementById('speed-drill-cards');
+    if (!container || !window.speedDrills) return;
+    
+    container.innerHTML = window.speedDrills.map(drill => `
+        <div class="speed-card" data-drill-id="${drill.id}">
+            <h4>${drill.name}</h4>
+            <p>${drill.description}</p>
+        </div>
+    `).join('');
+    
+    container.querySelectorAll('.speed-card').forEach(card => {
+        card.addEventListener('click', () => openSpeedDrill(card.dataset.drillId));
+    });
+}
+
+function openSpeedDrill(drillId) {
+    const drill = window.speedDrills?.find(d => d.id === drillId);
+    if (!drill) return;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    content.innerHTML = `
+        <div class="drill-practice">
+            <h3>🏁 ${drill.name}</h3>
+            <p>${drill.description}</p>
+            <div class="drill-instructions">
+                <p><strong>Goal:</strong> Complete as fast and accurately as possible</p>
+                <p>Timer will start when you click "Go"</p>
+            </div>
+            <div class="drill-timer" id="speed-timer">00:00</div>
+            <div class="drill-controls">
+                <button class="btn-start" id="start-speed">Start</button>
+                <button class="btn-complete" id="complete-speed">Done!</button>
+            </div>
+        </div>
+    `;
+    
+    let startTime = null;
+    let interval = null;
+    
+    document.getElementById('start-speed').addEventListener('click', () => {
+        startTime = Date.now();
+        interval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            document.getElementById('speed-timer').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }, 100);
+    });
+    
+    document.getElementById('complete-speed').addEventListener('click', () => {
+        if (interval) clearInterval(interval);
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const baseXP = 30;
+        const bonusXP = Math.max(0, 30 - elapsed); // Faster = more XP
+        addXP(baseXP + bonusXP, `Speed drill: ${drill.name}`);
+        logPractice(`Speed drill: ${drill.name} - ${elapsed}s`);
+        modal.classList.remove('active');
+    });
+    
+    modal.classList.add('active');
+}
+
+function initMicroSessions() {
+    document.querySelectorAll('.session-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const duration = parseInt(card.dataset.duration);
+            startMicroSession(duration);
+        });
+    });
+}
+
+function startMicroSession(minutes) {
+    const plan = window.microPractice?.generateSession(minutes);
+    if (!plan) return;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    let currentStep = 0;
+    const steps = [
+        { type: 'warmup', duration: plan.warmup, instruction: 'Warm up your hands and fingers' },
+        ...plan.drills,
+        ...plan.practice
+    ];
+    
+    function renderStep() {
+        const step = steps[currentStep];
+        if (!step) {
+            endMicroSession(minutes);
+            return;
+        }
+        
+        content.innerHTML = `
+            <div class="drill-practice">
+                <h3>⚡ ${minutes}-Minute Power Session</h3>
+                <div class="step-progress">
+                    Step ${currentStep + 1} of ${steps.length}
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${((currentStep + 1) / steps.length) * 100}%"></div>
+                    </div>
+                </div>
+                <div class="step-instruction">
+                    <p><strong>${step.type?.toUpperCase() || 'PRACTICE'}</strong></p>
+                    <p>${step.desc || step.instruction || 'Focus and play'}</p>
+                    ${step.minutes ? `<p class="time-hint">Spend ${step.minutes} minutes</p>` : ''}
+                </div>
+                <div class="drill-timer" id="micro-timer">${step.minutes || 1}:00</div>
+                <div class="drill-controls">
+                    <button class="btn-start" id="next-step">Next Step →</button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('next-step').addEventListener('click', () => {
+            currentStep++;
+            addXP(10, 'Micro session step');
+            renderStep();
+        });
+    }
+    
+    modal.classList.add('active');
+    renderStep();
+}
+
+function endMicroSession(minutes) {
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    addXP(50 + (minutes * 10), `${minutes}-minute session completed`);
+    logPractice(`${minutes}-minute micro session`);
+    
+    content.innerHTML = `
+        <div class="session-complete" style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
+            <h2>Session Complete!</h2>
+            <p style="color: var(--text-secondary); margin: 15px 0;">Great work! You completed a ${minutes}-minute focused session.</p>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')">Done</button>
+        </div>
+    `;
+}
+
+function initAssessment() {
+    document.getElementById('start-assessment')?.addEventListener('click', startAssessment);
+}
+
+function startAssessment() {
+    if (!window.quickAssessment) return;
+    
+    const questions = window.quickAssessment.questions;
+    const answers = [];
+    let currentQ = 0;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    function renderQuestion() {
+        const q = questions[currentQ];
+        
+        content.innerHTML = `
+            <div class="assessment-question">
+                <p style="color: var(--text-secondary)">Question ${currentQ + 1} of ${questions.length}</p>
+                <h4>${q.question}</h4>
+                <div class="answer-options">
+                    ${q.options.map((opt, i) => `
+                        <button class="answer-btn" data-answer="${opt}">${opt}</button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        content.querySelectorAll('.answer-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                answers.push(btn.dataset.answer);
+                currentQ++;
+                
+                if (currentQ < questions.length) {
+                    renderQuestion();
+                } else {
+                    showAssessmentResults(answers);
+                }
+            });
+        });
+    }
+    
+    modal.classList.add('active');
+    renderQuestion();
+}
+
+function showAssessmentResults(answers) {
+    const result = window.quickAssessment.calculate(answers);
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    localStorage.setItem('assessment_result', JSON.stringify(result));
+    
+    content.innerHTML = `
+        <div class="assessment-result" style="text-align: center; padding: 40px;">
+            <h2>Your Level: ${result.level.charAt(0).toUpperCase() + result.level.slice(1)}</h2>
+            <p style="font-size: 1.2rem; margin: 20px 0;">We recommend starting with Week ${result.recommendedWeek}</p>
+            <div style="background: var(--bg-hover); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <h4>Next Steps:</h4>
+                <ul style="text-align: left; margin-top: 10px;">
+                    ${window.fastTrackCurriculum?.weeks[result.recommendedWeek - 1]?.goals.map(g => 
+                        `<li>${g}</li>`
+                    ).join('') || '<li>Start with basics</li>'}
+                </ul>
+            </div>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')">Got It!</button>
+        </div>
+    `;
+}
+
+function renderFastTrack() {
+    const result = JSON.parse(localStorage.getItem('assessment_result') || '{}');
+    const week = result.recommendedWeek || 1;
+    const curriculum = window.fastTrackCurriculum?.weeks[week - 1];
+    
+    if (!curriculum) return;
+    
+    const weekEl = document.getElementById('current-week');
+    const goalsEl = document.getElementById('week-goals');
+    
+    if (weekEl) {
+        weekEl.innerHTML = `
+            <h3>Week ${week}: ${curriculum.title}</h3>
+            <p>Focus: ${curriculum.focus}</p>
+        `;
+    }
+    
+    if (goalsEl && curriculum.goals) {
+        goalsEl.innerHTML = curriculum.goals.map(goal => `
+            <div class="goal-item">
+                <div class="goal-check"></div>
+                <span>${goal}</span>
+            </div>
+        `).join('');
+    }
+}
+
+function startSpacedReview() {
+    if (!spacedRepetition) return;
+    
+    const dueItems = spacedRepetition.getDueItems();
+    if (dueItems.length === 0) return;
+    
+    let currentIndex = 0;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    function renderItem() {
+        const item = dueItems[currentIndex];
+        if (!item) {
+            showReviewComplete(dueItems.length);
+            return;
+        }
+        
+        content.innerHTML = `
+            <div class="review-item">
+                <h3>🔄 Spaced Review</h3>
+                <p style="color: var(--text-secondary)">Item ${currentIndex + 1} of ${dueItems.length}</p>
+                <div class="review-content" style="background: var(--bg-hover); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                    <h4>${item.type}: ${item.data?.name || item.id}</h4>
+                    <p>Review this item from memory</p>
+                </div>
+                <p>How well did you remember?</p>
+                <div class="rating-buttons" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;">
+                    <button class="rating-btn" data-quality="1" style="background: var(--danger);">Fail</button>
+                    <button class="rating-btn" data-quality="2" style="background: var(--warning);">Hard</button>
+                    <button class="rating-btn" data-quality="3" style="background: var(--success);">Good</button>
+                    <button class="rating-btn" data-quality="4" style="background: #3b82f6;">Easy</button>
+                    <button class="rating-btn" data-quality="5" style="background: var(--primary);">Perfect</button>
+                </div>
+            </div>
+        `;
+        
+        content.querySelectorAll('.rating-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const quality = parseInt(btn.dataset.quality);
+                spacedRepetition.reviewItem(item.id, quality);
+                addXP(5, 'Spaced review');
+                currentIndex++;
+                renderItem();
+            });
+        });
+    }
+    
+    modal.classList.add('active');
+    renderItem();
+}
+
+function showReviewComplete(count) {
+    const content = document.getElementById('drill-content');
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🧠</div>
+            <h2>Review Complete!</h2>
+            <p style="color: var(--text-secondary); margin: 15px 0;">Reviewed ${count} items</p>
+            <p>Next review session will optimize based on your performance</p>
+            <button class="btn-start" onclick="document.getElementById('drill-modal').classList.remove('active')">Done</button>
+        </div>
+    `;
+}
+
+// Initialize fast learning on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initFastLearning, 100);
+});
+
