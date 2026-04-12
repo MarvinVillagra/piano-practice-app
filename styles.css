@@ -1920,3 +1920,224 @@ header h1 {
     font-size: 4rem;
     margin-bottom: 20px;
 }
+
+/* Scale Learning Path */
+.scale-overview {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.scale-stats {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+.scale-stats span {
+    color: var(--text-secondary);
+}
+
+.scale-stats strong {
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.scale-learning-path {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.path-levels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.path-level {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.path-level h4 {
+    margin-bottom: 5px;
+}
+
+.path-level p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.scale-list-mini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.scale-chip {
+    background: var(--bg-card);
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.scale-chip:hover {
+    background: var(--primary);
+}
+
+.scale-chip.learned {
+    background: var(--success);
+    color: white;
+}
+
+.scale-chip.locked {
+    opacity: 0.5;
+}
+
+/* Scale Selector */
+.scale-selector {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.scale-selector h3 {
+    margin-bottom: 15px;
+}
+
+/* Exercise Grid */
+.exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.exercise-card {
+    background: var(--bg-hover);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.exercise-card:hover {
+    background: var(--primary);
+    transform: translateY(-2px);
+}
+
+.exercise-card.completed {
+    border-left: 4px solid var(--success);
+}
+
+.exercise-card h4 {
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+}
+
+.exercise-card p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Scale Info Enhanced */
+.scale-info-box {
+    background: var(--bg-hover);
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.scale-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.detail-item {
+    background: var(--bg-card);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.detail-item label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.detail-item span {
+    font-weight: 600;
+}
+
+/* Fingering Display */
+.fingering-display {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.hand-fingering {
+    text-align: center;
+}
+
+.hand-fingering h5 {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.finger-numbers {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.finger-num {
+    width: 30px;
+    height: 30px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Chord Suggestions */
+.chord-suggestions {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 10px;
+}
+
+.chord-suggestions h4 {
+    margin-bottom: 10px;
+}
+
+.chord-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chord-item {
+    padding: 5px 12px;
+    background: var(--bg-card);
+    border-radius: 15px;
+    font-size: 0.9rem;
+}

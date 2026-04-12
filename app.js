@@ -2379,3 +2379,237 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initAppWithDatabase, 100);
 });
 
+
+// ============== SCALE LEARNING MODULE ==============
+function initScaleLearning() {
+    if (!window.completeScaleLibrary) return;
+    
+    renderScaleLearningPath();
+    renderScaleExercises();
+}
+
+function renderScaleLearningPath() {
+    const paths = window.scaleLearningPath;
+    if (!paths) return;
+    
+    const learned = state.learnedScales || [];
+    
+    // Beginner scales
+    const beginnerEl = document.getElementById('beginner-scales');
+    if (beginnerEl) {
+        beginnerEl.innerHTML = paths.beginner.map(scale => {
+            const [key, type] = scale.split(' ');
+            const scaleKey = `${key}-${type || 'major'}`;
+            const isLearned = learned.includes(scaleKey);
+            return `<span class="scale-chip ${isLearned ? 'learned' : ''}" data-key="${key}" data-type="${type || 'major'}">${key} ${type || ''}</span>`;
+        }).join('');
+    }
+    
+    // Intermediate scales
+    const intermediateEl = document.getElementById('intermediate-scales');
+    if (intermediateEl) {
+        intermediateEl.innerHTML = paths.intermediate.map(scale => {
+            const [key, type] = scale.split(' ');
+            const scaleKey = `${key}-${type || 'major'}`;
+            const isLearned = learned.includes(scaleKey);
+            return `<span class="scale-chip ${isLearned ? 'learned' : ''}" data-key="${key}" data-type="${type || 'major'}">${key} ${type || ''}</span>`;
+        }).join('');
+    }
+    
+    // Advanced scales
+    const advancedEl = document.getElementById('advanced-scales');
+    if (advancedEl) {
+        advancedEl.innerHTML = paths.advanced.map(scale => {
+            const [key, type] = scale.split(' ');
+            const scaleKey = `${key}-${type || 'major'}`;
+            const isLearned = learned.includes(scaleKey);
+            return `<span class="scale-chip ${isLearned ? 'learned' : ''}" data-key="${key}" data-type="${type || 'major'}">${key} ${type || ''}</span>`;
+        }).join('');
+    }
+    
+    // Add click handlers
+    document.querySelectorAll('.scale-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.getElementById('scale-type').value = chip.dataset.type;
+            document.getElementById('key-root').value = chip.dataset.key;
+            generateScaleExercise();
+        });
+    });
+    
+    // Update count
+    document.getElementById('scales-learned-count').textContent = learned.length;
+    document.getElementById('scales-progress-percent').textContent = 
+        Math.round((learned.length / 24) * 100) + '%';
+}
+
+function renderScaleExercises() {
+    const container = document.getElementById('scale-exercise-grid');
+    if (!container || !window.scaleExercises) return;
+    
+    container.innerHTML = window.scaleExercises.slice(0, 6).map(ex => `
+        <div class="exercise-card" data-exercise="${ex.id}">
+            <h4>${ex.name}</h4>
+            <p>${ex.focus}</p>
+        </div>
+    `).join('');
+    
+    container.querySelectorAll('.exercise-card').forEach(card => {
+        card.addEventListener('click', () => {
+            // Start this exercise with current scale
+            const type = document.getElementById('scale-type').value;
+            const key = document.getElementById('key-root').value;
+            startScaleExercise(key, type, card.dataset.exercise);
+        });
+    });
+}
+
+function generateScaleExercise() {
+    const type = document.getElementById('scale-type').value;
+    const key = document.getElementById('key-root').value;
+    
+    const scaleData = window.completeScaleLibrary?.[type]?.[key];
+    if (!scaleData) {
+        document.getElementById('scale-info').innerHTML = '<h3>Scale not available</h3>';
+        return;
+    }
+    
+    // Highlight piano keys
+    highlightPianoKeys(scaleData.notes);
+    
+    // Build comprehensive scale info
+    const typeName = type.charAt(0).toUpperCase() + type.slice(1);
+    const accidentals = scaleData.sharps?.length > 0 
+        ? `${scaleData.sharps.length} sharps: ${scaleData.sharps.join(', ')}`
+        : scaleData.flats?.length > 0 
+        ? `${scaleData.flats.length} flats: ${scaleData.flats.join(', ')}`
+        : 'No accidentals';
+    
+    document.getElementById('scale-info').innerHTML = `
+        <h3>${key} ${typeName}</h3>
+        <div class="scale-info-box">
+            <div class="scale-details">
+                <div class="detail-item">
+                    <label>Accidentals</label>
+                    <span>${accidentals}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Difficulty</label>
+                    <span>${'⭐'.repeat(scaleData.difficulty)}</span>
+                </div>
+            </div>
+            
+            <div class="scale-notes" style="margin: 15px 0;">
+                ${scaleData.notes.map(n => `<span class="note-badge">${n}</span>`).join('')}
+            </div>
+            
+            <div class="fingering-display">
+                <div class="hand-fingering">
+                    <h5>Right Hand</h5>
+                    <div class="finger-numbers">
+                        ${scaleData.fingering.right.split('-').map(f => `<span class="finger-num">${f}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="hand-fingering">
+                    <h5>Left Hand</h5>
+                    <div class="finger-numbers">
+                        ${scaleData.fingering.left.split('-').map(f => `<span class="finger-num">${f}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+            
+            <p class="scale-tip">💡 ${scaleData.tips}</p>
+            
+            ${scaleData.relative ? `<p>Relative ${type === 'major' ? 'minor' : 'major'}: ${scaleData.relative}</p>` : ''}
+            
+            ${scaleData.chords ? `
+                <div class="chord-suggestions">
+                    <h4>Chords in this key:</h4>
+                    <div class="chord-list">
+                        ${scaleData.chords.map(c => `<span class="chord-item">${c}</span>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+            <button class="btn-start" onclick="openScalePractice('${key}', '${type}')">📝 Practice</button>
+            <button class="btn-start" onclick="startScalePracticeWithDetection('${type}', '${key}')" style="background: var(--success);">🎤 Listen & Check</button>
+        </div>
+    `;
+}
+
+function startScaleExercise(key, type, exerciseId) {
+    const scaleData = window.completeScaleLibrary?.[type]?.[key];
+    const exercise = window.scaleExercises?.find(e => e.id === exerciseId);
+    
+    if (!scaleData || !exercise) return;
+    
+    const modal = document.getElementById('drill-modal');
+    const content = document.getElementById('drill-content');
+    
+    content.innerHTML = `
+        <div class="drill-practice">
+            <h3>${exercise.name}</h3>
+            <p style="color: var(--text-secondary);">${exercise.description}</p>
+            
+            <div class="scale-info-box" style="margin: 15px 0;">
+                <p><strong>Scale:</strong> ${key} ${type}</p>
+                <p><strong>Notes:</strong> ${scaleData.notes.join(' → ')}</p>
+                <p><strong>Focus:</strong> ${exercise.focus}</p>
+                <p><strong>Tempo:</strong> ${exercise.tempo} BPM</p>
+            </div>
+            
+            <div class="drill-timer" id="exercise-timer">00:00</div>
+            <p id="exercise-hint">Start the metronome and play the ${exercise.name.toLowerCase()}</p>
+            
+            <div class="drill-controls">
+                <button class="btn-start" id="start-exercise">Start</button>
+                <button class="btn-complete" id="complete-exercise">Mark Complete</button>
+            </div>
+        </div>
+    `;
+    
+    let seconds = 0;
+    let interval = null;
+    
+    document.getElementById('start-exercise').addEventListener('click', function() {
+        if (!interval) {
+            this.textContent = 'Running...';
+            interval = setInterval(() => {
+                seconds++;
+                document.getElementById('exercise-timer').textContent = 
+                    `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    });
+    
+    document.getElementById('complete-exercise').addEventListener('click', async () => {
+        clearInterval(interval);
+        
+        // Save progress
+        const scaleKey = `${key}-${type}`;
+        if (!state.learnedScales.includes(scaleKey)) {
+            state.learnedScales.push(scaleKey);
+            localStorage.setItem('learnedScales', JSON.stringify(state.learnedScales));
+        }
+        
+        addXP(15, `Scale exercise: ${exercise.name}`);
+        logPractice(`${key} ${type}: ${exercise.name}`);
+        
+        // Update database
+        if (window.pianoDB) {
+            await window.pianoDB.learnScale(scaleKey, { exercise: exerciseId });
+        }
+        
+        renderScaleLearningPath();
+        modal.classList.remove('active');
+    });
+    
+    modal.classList.add('active');
+}
+
+// Initialize scale learning on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initScaleLearning, 200);
+});
+

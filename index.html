@@ -212,35 +212,75 @@
 
         <!-- Scales Section -->
         <section id="scales" class="section">
-            <h2>🎼 Scale Mastery</h2>
-            <p class="section-desc">Learn scales with proper fingering</p>
+            <h2>🎼 Complete Scale Mastery</h2>
+            <p class="section-desc">Learn all 24 major and minor scales with proper fingering</p>
             
-            <div class="scale-controls">
-                <select id="scale-type">
-                    <option value="major">Major</option>
-                    <option value="minor">Minor (Natural)</option>
-                </select>
-                <select id="key-root">
-                    <option value="C">C</option>
-                    <option value="G">G</option>
-                    <option value="D">D</option>
-                    <option value="A">A</option>
-                    <option value="E">E</option>
-                    <option value="B">B</option>
-                    <option value="F#">F#</option>
-                    <option value="F">F</option>
-                    <option value="Bb">Bb</option>
-                    <option value="Eb">Eb</option>
-                    <option value="Ab">Ab</option>
-                    <option value="Db">Db</option>
-                </select>
-                <button id="generate-scale">Practice Scale</button>
+            <div class="scale-overview">
+                <div class="scale-stats">
+                    <span>Learned: <strong id="scales-learned-count">0</strong> / 24</span>
+                    <span>Progress: <strong id="scales-progress-percent">0%</strong></span>
+                </div>
+            </div>
+
+            <div class="scale-learning-path">
+                <h3>📚 Learning Path</h3>
+                <div class="path-levels">
+                    <div class="path-level" data-level="beginner">
+                        <h4>🌱 Beginner</h4>
+                        <p>6 scales • No sharps/flats to 2 accidentals</p>
+                        <div class="scale-list-mini" id="beginner-scales"></div>
+                    </div>
+                    <div class="path-level" data-level="intermediate">
+                        <h4>🌿 Intermediate</h4>
+                        <p>8 scales • 3-4 accidentals</p>
+                        <div class="scale-list-mini" id="intermediate-scales"></div>
+                    </div>
+                    <div class="path-level" data-level="advanced">
+                        <h4>🌳 Advanced</h4>
+                        <p>6 scales • 5+ accidentals</p>
+                        <div class="scale-list-mini" id="advanced-scales"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scale-selector">
+                <h3>🎹 Practice a Scale</h3>
+                <div class="scale-controls">
+                    <select id="scale-type">
+                        <option value="major">Major</option>
+                        <option value="minor">Minor (Natural)</option>
+                    </select>
+                    <select id="key-root">
+                        <option value="C">C</option>
+                        <option value="G">G</option>
+                        <option value="D">D</option>
+                        <option value="A">A</option>
+                        <option value="E">E</option>
+                        <option value="B">B</option>
+                        <option value="F#">F#</option>
+                        <option value="C#">C#</option>
+                        <option value="F">F</option>
+                        <option value="Bb">Bb</option>
+                        <option value="Eb">Eb</option>
+                        <option value="Ab">Ab</option>
+                        <option value="Db">Db</option>
+                        <option value="Gb">Gb</option>
+                    </select>
+                    <button id="generate-scale">Practice Scale →</button>
+                </div>
             </div>
 
             <div class="scale-display">
                 <div class="piano-visual" id="piano-visual"></div>
                 <div class="scale-info" id="scale-info">
                     <h3>Select a scale to begin</h3>
+                </div>
+            </div>
+
+            <div class="scale-exercises">
+                <h3>🎯 Scale Exercises</h3>
+                <div class="exercise-grid" id="scale-exercise-grid">
+                    <!-- Exercises will be populated -->
                 </div>
             </div>
         </section>
@@ -454,6 +494,7 @@
     <script src="advanced.js"></script>
     <script src="audio-detection.js"></script>
     <script src="database.js"></script>
+    <script src="scales-module.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
