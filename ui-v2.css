@@ -1665,3 +1665,471 @@ body.light-mode .toast-glass.success {
         text-align: center;
     }
 }
+
+/* Piano Keyboard Styles */
+.piano-keyboard {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+    --white-key-width: 45px;
+    --black-key-width: 30px;
+    --black-key-offset: 30px;
+}
+
+.octave {
+    position: relative;
+    display: flex;
+}
+
+.white-key {
+    --white-key-width: 45px;
+    width: var(--white-key-width);
+    height: 150px;
+    background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
+    border: 1px solid #999;
+    border-radius: 0 0 5px 5px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    transition: all 0.1s;
+}
+
+.white-key:hover {
+    background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+}
+
+.white-key.pressed {
+    background: linear-gradient(180deg, #ddd 0%, #ccc 100%);
+    transform: translateY(2px);
+}
+
+.white-key.correct {
+    background: linear-gradient(180deg, #06FFA5 0%, #05cc85 100%) !important;
+}
+
+.white-key.wrong {
+    background: linear-gradient(180deg, #FF6B6B 0%, #cc5555 100%) !important;
+}
+
+.black-key {
+    width: var(--black-key-width);
+    height: 95px;
+    background: linear-gradient(180deg, #333 0%, #000 100%);
+    border-radius: 0 0 4px 4px;
+    cursor: pointer;
+    position: absolute;
+    z-index: 10;
+    transition: all 0.1s;
+}
+
+.black-key:hover {
+    background: linear-gradient(180deg, #444 0%, #111 100%);
+}
+
+.black-key.pressed {
+    background: linear-gradient(180deg, #222 0%, #000 100%);
+    transform: translateY(2px);
+}
+
+.black-key.correct {
+    background: linear-gradient(180deg, #06FFA5 0%, #05cc85 100%) !important;
+}
+
+.black-key.wrong {
+    background: linear-gradient(180deg, #FF6B6B 0%, #cc5555 100%) !important;
+}
+
+.key-label {
+    font-size: 10px;
+    color: #666;
+    font-weight: 600;
+}
+
+.black-key + .black-key .key-label {
+    color: #999;
+}
+
+/* Practice Controls */
+.practice-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 16px;
+    background: var(--glass);
+    border-radius: var(--radius-md);
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-group label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.control-group select, .control-group input[type="range"] {
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    padding: 8px 12px;
+}
+
+.notes-sequence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.sequence-note {
+    background: var(--glass);
+    border: 2px solid var(--glass-border);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.sequence-note.current {
+    border-color: #FFE66D;
+    background: rgba(255, 230, 109, 0.2);
+    transform: scale(1.1);
+}
+
+.sequence-note.played {
+    border-color: var(--accent-tertiary);
+    background: rgba(6, 255, 165, 0.2);
+}
+
+.sequence-note.correct {
+    background: var(--gradient-success);
+    color: white;
+}
+
+.sequence-note.wrong {
+    background: #FF6B6B;
+    color: white;
+}
+
+.more-notes {
+    padding: 10px;
+    color: var(--text-tertiary);
+}
+
+.practice-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.song-info-extra {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 20px;
+}
+
+.song-info-extra p {
+    margin: 5px 0;
+}
+
+/* Song Complete Screen */
+.song-complete {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.completion-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 30px 0;
+}
+
+.completion-stats .stat {
+    text-align: center;
+}
+
+.completion-stats .big {
+    font-size: 2.5rem;
+    font-weight: 800;
+    display: block;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.completion-stats .label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.xp-earned {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-tertiary);
+    margin: 20px 0;
+}
+
+/* Current Note Display */
+.current-note-display {
+    background: linear-gradient(135deg, rgba(131, 56, 236, 0.2), rgba(6, 255, 165, 0.2));
+    padding: 30px;
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+    text-align: center;
+}
+
+.note-label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.current-note {
+    font-size: 4rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Progress Bar */
+.practice-progress {
+    margin: 20px 0;
+}
+
+.progress-bar {
+    height: 10px;
+    background: var(--glass);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--gradient-success);
+    border-radius: 5px;
+    transition: width 0.3s;
+}
+
+#note-counter {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.stats-live {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+    font-size: 1.2rem;
+}
+
+.stats-live span {
+    color: var(--text-secondary);
+}
+
+#correct-count {
+    color: var(--accent-tertiary);
+}
+
+#wrong-count {
+    color: #FF6B6B;
+}
+
+/* Onboarding Styles */
+.onboarding-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-tooltip {
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 30px;
+    max-width: 400px;
+    position: relative;
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(131, 56, 236, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(131, 56, 236, 0.5); }
+}
+
+.onboarding-skip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.onboarding-skip:hover {
+    color: var(--text-secondary);
+}
+
+.onboarding-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.onboarding-content {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.onboarding-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--glass-border);
+    transition: all 0.3s;
+}
+
+.step-dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
+}
+
+.step-dot.completed {
+    background: var(--accent-tertiary);
+}
+
+.onboarding-highlight {
+    position: relative;
+    z-index: 10001 !important;
+    animation: highlight-pulse 1s infinite;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% { box-shadow: 0 0 10px var(--accent); }
+    50% { box-shadow: 0 0 30px var(--accent); }
+}
+
+/* Lesson Cards */
+.lesson-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lesson-card:hover {
+    border-color: var(--accent);
+    transform: translateX(5px);
+}
+
+.lesson-card.completed {
+    border-color: var(--accent-tertiary);
+}
+
+.lesson-card.completed::before {
+    content: '✓';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-tertiary);
+    font-size: 1.5rem;
+}
+
+.lesson-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.lesson-title {
+    font-weight: 600;
+}
+
+.lesson-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.objectives {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.objectives li {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin: 4px 0;
+}
+
+/* Exercise Types */
+.exercise-info {
+    background: var(--glass);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+}
+
+.exercise-practice {
+    background: linear-gradient(135deg, rgba(131, 56, 236, 0.1), rgba(6, 255, 165, 0.1));
+    padding: 30px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    margin: 20px 0;
+}
+
+.exercise-practice .target {
+    font-size: 3rem;
+    font-weight: 800;
+}
+
+.exercise-practice .instruction {
+    color: var(--text-secondary);
+    margin-top: 15px;
+}
