@@ -647,6 +647,9 @@ function toggleDarkMode() {
     state.darkMode = !state.darkMode;
     localStorage.setItem('darkMode', state.darkMode);
     applyTheme();
+    // Modal close button
+    document.getElementById('modal-close')?.addEventListener('click', closeModal);
+
 }
 
 function applyTheme() {
@@ -821,6 +824,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDrills();
     updateHomeStats();
     applyTheme();
+    // Modal close button
+    document.getElementById('modal-close')?.addEventListener('click', closeModal);
+
     
     // Scale buttons
     document.getElementById('generate-scale')?.addEventListener('click', () => {
@@ -1299,3 +1305,158 @@ function initSessionDisplay() {
 document.addEventListener('DOMContentLoaded', () => {
     initSessionDisplay();
 });
+
+// ============== THEORY LESSON FUNCTION ==============
+function showTheoryLesson(topic) {
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    
+    const lessons = {
+        scales: {
+            title: '🎵 Scales & Modes',
+            content: `
+                <div class="theory-lesson">
+                    <h3>What is a Scale?</h3>
+                    <p>A scale is a sequence of notes in ascending or descending order, based on a specific pattern of intervals.</p>
+                    
+                    <h4>Major Scale Pattern</h4>
+                    <p>W-W-H-W-W-W-H (W=Whole step, H=Half step)</p>
+                    <p><strong>Example:</strong> C Major = C-D-E-F-G-A-B-C</p>
+                    
+                    <h4>Natural Minor Scale Pattern</h4>
+                    <p>W-H-W-W-H-W-W</p>
+                    <p><strong>Example:</strong> A Minor = A-B-C-D-E-F-G-A</p>
+                    
+                    <h4>The 7 Modes</h4>
+                    <ul>
+                        <li><strong>Ionian</strong> - Major scale (happy, bright)</li>
+                        <li><strong>Dorian</strong> - Minor with raised 6th (jazz, soulful)</li>
+                        <li><strong>Phrygian</strong> - Minor with flattened 2nd (Spanish, exotic)</li>
+                        <li><strong>Lydian</strong> - Major with raised 4th (dreamy, ethereal)</li>
+                        <li><strong>Mixolydian</strong> - Major with flattened 7th (blues, rock)</li>
+                        <li><strong>Aeolian</strong> - Natural minor (sad, melancholic)</li>
+                        <li><strong>Locrian</strong> - Diminished (tense, unstable)</li>
+                    </ul>
+                </div>
+            `
+        },
+        chords: {
+            title: '🎹 Chord Theory',
+            content: `
+                <div class="theory-lesson">
+                    <h3>What is a Chord?</h3>
+                    <p>A chord is three or more notes played simultaneously. The most common are triads (3-note chords).</p>
+                    
+                    <h4>Major Chord</h4>
+                    <p>Root + Major 3rd + Perfect 5th</p>
+                    <p><strong>Formula:</strong> 4 + 3 semitones</p>
+                    <p><strong>Example:</strong> C Major = C-E-G</p>
+                    
+                    <h4>Minor Chord</h4>
+                    <p>Root + Minor 3rd + Perfect 5th</p>
+                    <p><strong>Formula:</strong> 3 + 4 semitones</p>
+                    <p><strong>Example:</strong> C Minor = C-Eb-G</p>
+                    
+                    <h4>Diminished Chord</h4>
+                    <p>Root + Minor 3rd + Diminished 5th</p>
+                    <p><strong>Formula:</strong> 3 + 3 semitones</p>
+                    <p><strong>Example:</strong> C Dim = C-Eb-Gb</p>
+                    
+                    <h4>Augmented Chord</h4>
+                    <p>Root + Major 3rd + Augmented 5th</p>
+                    <p><strong>Formula:</strong> 4 + 4 semitones</p>
+                    <p><strong>Example:</strong> C Aug = C-E-G#</p>
+                    
+                    <h4>7th Chords</h4>
+                    <ul>
+                        <li><strong>Major 7:</strong> Major triad + Major 7th</li>
+                        <li><strong>Dominant 7:</strong> Major triad + Minor 7th</li>
+                        <li><strong>Minor 7:</strong> Minor triad + Minor 7th</li>
+                        <li><strong>Half-Dim 7:</strong> Dim triad + Minor 7th</li>
+                        <li><strong>Dim 7:</strong> Dim triad + Diminished 7th</li>
+                    </ul>
+                </div>
+            `
+        },
+        circle: {
+            title: '🎼 Circle of Fifths',
+            content: `
+                <div class="theory-lesson">
+                    <h3>Understanding the Circle of Fifths</h3>
+                    <p>The Circle of Fifths shows the relationship between all 12 major and minor keys.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>Moving clockwise: Add one sharp (or remove one flat)</p>
+                    <p>Moving counterclockwise: Add one flat (or remove one sharp)</p>
+                    
+                    <h4>Major Keys (Clockwise from C)</h4>
+                    <p>C → G → D → A → E → B → F# → C#</p>
+                    <p>C → F → Bb → Eb → Ab → Db → Gb → Cb</p>
+                    
+                    <h4>Key Signatures</h4>
+                    <ul>
+                        <li><strong>C Major / A Minor:</strong> No sharps or flats</li>
+                        <li><strong>G Major / E Minor:</strong> 1 sharp (F#)</li>
+                        <li><strong>D Major / B Minor:</strong> 2 sharps (F#, C#)</li>
+                        <li><strong>F Major / D Minor:</strong> 1 flat (Bb)</li>
+                        <li><strong>Bb Major / G Minor:</strong> 2 flats (Bb, Eb)</li>
+                    </ul>
+                    
+                    <h4>Why It Matters</h4>
+                    <p>• Finding the relative minor/major of any key</p>
+                    <p>• Understanding chord progressions (I-IV-V-I)</p>
+                    <p>• Transposing songs to different keys</p>
+                    <p>• Memorizing key signatures</p>
+                </div>
+            `
+        },
+        modes: {
+            title: '🎭 Modes & Moods',
+            content: `
+                <div class="theory-lesson">
+                    <h3>Musical Modes and Their Emotional Qualities</h3>
+                    
+                    <h4>Ionian (Major)</h4>
+                    <p><strong>Sound:</strong> Happy, bright, triumphant</p>
+                    <p><strong>Use:</strong> Pop, anthems, celebrations</p>
+                    
+                    <h4>Dorian</h4>
+                    <p><strong>Sound:</strong> Sophisticated, soulful, jazzy</p>
+                    <p><strong>Use:</strong> Jazz, funk, R&B</p>
+                    
+                    <h4>Phrygian</h4>
+                    <p><strong>Sound:</strong> Exotic, Spanish, mysterious</p>
+                    <p><strong>Use:</strong> Flamenco, metal, film scores</p>
+                    
+                    <h4>Lydian</h4>
+                    <p><strong>Sound:</strong> Dreamy, ethereal, floating</p>
+                    <p><strong>Use:</strong> Film scores, ambient music</p>
+                    
+                    <h4>Mixolydian</h4>
+                    <p><strong>Sound:</strong> Bluesy, rock, confident</p>
+                    <p><strong>Use:</strong> Rock, blues, jazz</p>
+                    
+                    <h4>Aeolian (Natural Minor)</h4>
+                    <p><strong>Sound:</strong> Sad, melancholic, introspective</p>
+                    <p><strong>Use:</strong> Ballads, emo, classical</p>
+                    
+                    <h4>Locrian</h4>
+                    <p><strong>Sound:</strong> Tense, unstable, dark</p>
+                    <p><strong>Use:</strong> Avant-garde, metal, horror</p>
+                </div>
+            `
+        }
+    };
+    
+    const lesson = lessons[topic] || lessons.scales;
+    
+    body.innerHTML = `
+        <div class="theory-modal">
+            <h2>${lesson.title}</h2>
+            ${lesson.content}
+            <button class="neon-btn" onclick="closeModal()" style="width: 100%; margin-top: 20px;">Got It!</button>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
