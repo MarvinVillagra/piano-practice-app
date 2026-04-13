@@ -1287,3 +1287,15 @@ function completeSongPractice(correct, total, duration) {
 document.addEventListener('DOMContentLoaded', () => {
     renderSongs();
 });
+
+// ============== SESSION DISPLAY INIT ==============
+let sessionDisplay = null;
+
+function initSessionDisplay() {
+    sessionDisplay = new SessionDisplay('session-display');
+    sessionDisplay.render();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initSessionDisplay();
+});

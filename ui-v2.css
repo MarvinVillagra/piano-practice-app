@@ -2270,3 +2270,147 @@ body.light-mode .toast-glass.success {
     padding: 6px 12px;
     font-size: 0.85rem;
 }
+
+/* Practice Timer Styles */
+.session-timer {
+    padding: 20px;
+    text-align: center;
+}
+
+.timer-display {
+    margin-bottom: 20px;
+}
+
+.timer-time {
+    font-size: 4rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.timer-target {
+    display: block;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.timer-progress {
+    margin: 30px 0;
+}
+
+.timer-progress-bar {
+    height: 12px;
+    background: var(--glass);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.timer-progress-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 6px;
+    transition: width 1s linear;
+    width: 0%;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.session-settings {
+    margin: 20px 0;
+}
+
+.session-settings select {
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    margin-left: 8px;
+}
+
+.session-notes {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--glass);
+    border-radius: var(--radius-md);
+    text-align: left;
+}
+
+.session-notes input {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    margin-top: 10px;
+}
+
+.notes-list {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.note-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.note-time {
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+/* Session Summary */
+.session-summary {
+    padding: 30px;
+    text-align: center;
+}
+
+.summary-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 0;
+}
+
+.summary-stat {
+    text-align: center;
+}
+
+.summary-stat .big {
+    font-size: 2.5rem;
+    font-weight: 800;
+    display: block;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.summary-stat .label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.session-notes-summary {
+    background: var(--glass);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    text-align: left;
+    margin: 20px 0;
+}
+
+.motivational-message {
+    font-size: 1.2rem;
+    color: var(--accent-tertiary);
+    margin: 20px 0;
+}
