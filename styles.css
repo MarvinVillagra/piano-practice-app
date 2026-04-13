@@ -2265,3 +2265,349 @@ input:checked + .toggle-slider::after {
 .modal-content button {
     margin-top: 15px;
 }
+
+/* Circle of Fifths Styles */
+.circle-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto;
+    perspective: 1000px;
+}
+
+.circle-inner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: rotateCircle 60s linear infinite paused;
+}
+
+.circle-inner:hover {
+    animation-play-state: running;
+}
+
+@keyframes rotateCircle {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.circle-key {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    transform-origin: center;
+}
+
+.circle-key:hover {
+    transform: scale(1.2);
+    background: var(--primary);
+    color: white;
+    z-index: 10;
+}
+
+.circle-key.current {
+    background: var(--primary);
+    color: white;
+    border: 2px solid var(--success);
+    box-shadow: 0 0 20px var(--primary);
+}
+
+.key-name {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.key-info {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.key-minor {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-top: 2px;
+}
+
+.circle-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-card);
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    padding: 10px;
+    text-align: center;
+}
+
+.mode-toggle {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.mode-btn {
+    padding: 2px 8px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    background: var(--bg-hover);
+}
+
+.mode-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.scale-actions {
+    margin-top: 5px;
+}
+
+.scale-actions button {
+    margin: 2px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+}
+
+/* Circle Controls */
+.circle-controls {
+    margin: 30px 0;
+    text-align: center;
+}
+
+.practice-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.practice-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--primary);
+    padding: 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.practice-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Progress Ring */
+.progress-ring {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin: 15px 0;
+    justify-content: center;
+}
+
+.progress-segment {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-hover);
+    border: 1px solid var(--text-secondary);
+}
+
+.progress-segment.learned {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+/* Modal Styles for Circle Practice */
+.modal-content .chord-progression {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.chord-badge {
+    background: var(--primary);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+.practice-instructions {
+    background: var(--bg-hover);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.practice-steps {
+    margin-top: 10px;
+}
+
+.practice-steps p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+/* Genre Grid */
+.genre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.genre-option {
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.genre-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Extended Chords Grid */
+.extended-chords-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.chord-item {
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.chord-item h4 {
+    margin-bottom: 5px;
+    color: var(--primary);
+}
+
+.chord-mood {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.chord-notes {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+/* Progression Grid */
+.progression-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.progression-item {
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.progression-item h4 {
+    margin-bottom: 8px;
+    color: var(--primary);
+}
+
+/* Circle Practice Order */
+.circle-practice-order {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.circle-step {
+    padding: 8px 12px;
+    background: var(--bg-hover);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .circle-container {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .circle-key {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .key-name {
+        font-size: 1rem;
+    }
+    
+    .circle-center {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .practice-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .circle-container {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .circle-key {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .key-name {
+        font-size: 0.8rem;
+    }
+    
+    .circle-center {
+        width: 80px;
+        height: 80px;
+        font-size: 0.8rem;
+    }
+    
+    .scale-actions button {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+}
