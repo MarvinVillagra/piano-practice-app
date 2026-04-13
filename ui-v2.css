@@ -2133,3 +2133,140 @@ body.light-mode .toast-glass.success {
     color: var(--text-secondary);
     margin-top: 15px;
 }
+
+/* Theory Reference Styles */
+.theory-reference {
+    padding: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.theory-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+.theory-tab {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theory-tab:hover, .theory-tab.active {
+    background: var(--gradient-primary);
+}
+
+.theory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.theory-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.theory-card h4 {
+    margin-bottom: 10px;
+}
+
+.theory-card .pattern {
+    color: var(--accent);
+    font-family: monospace;
+    margin: 8px 0;
+}
+
+.theory-card .mood {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.theory-card .example {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+.progression-section {
+    margin: 20px 0;
+    padding: 16px;
+    background: var(--glass);
+    border-radius: var(--radius-md);
+}
+
+.progression-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.progression-item:last-child {
+    border-bottom: none;
+}
+
+.position-rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.rule-card {
+    background: var(--glass);
+    padding: 16px;
+    border-radius: var(--radius-md);
+}
+
+.rule-card h4 {
+    margin-bottom: 10px;
+}
+
+.rule-card .tip {
+    color: var(--accent-tertiary);
+    font-size: 0.9rem;
+    margin-top: 8px;
+}
+
+.fingering-section, .mistakes-section, .tips-section {
+    margin: 20px 0;
+    padding: 16px;
+    background: var(--glass);
+    border-radius: var(--radius-md);
+}
+
+.mistake-item {
+    padding: 10px 0;
+}
+
+.mistake-item .wrong {
+    color: #FF6B6B;
+}
+
+.mistake-item .fix {
+    color: var(--accent-tertiary);
+}
+
+.tip-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.tip-item:last-child {
+    border-bottom: none;
+}
+
+.neon-btn.small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
