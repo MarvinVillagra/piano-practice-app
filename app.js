@@ -2851,3 +2851,73 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initSettingsUI, 500);
 });
 
+
+// ============== QUICK START BUTTON FIX ==============
+function fixQuickStartButtons() {
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        // Remove old listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        // Add fresh listener
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const action = newBtn.dataset.action;
+            console.log('Quick start action:', action);
+            
+            switch(action) {
+                case 'drills':
+                    navigateToSection('drills');
+                    break;
+                case 'scales':
+                    navigateToSection('scales');
+                    break;
+                case 'sight-reading':
+                    if (typeof openSightReading === 'function') {
+                        openSightReading();
+                    } else {
+                        navigateToSection('tools');
+                    }
+                    break;
+                case 'ear-training':
+                    if (typeof openEarTraining === 'function') {
+                        openEarTraining();
+                    } else {
+                        navigateToSection('tools');
+                    }
+                    break;
+            }
+        });
+    });
+}
+
+function navigateToSection(sectionId) {
+    // Update nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.section === sectionId);
+    });
+    
+    // Update sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.toggle('active', section.id === sectionId);
+    });
+    
+    console.log('Navigated to:', sectionId);
+}
+
+// Run fix after DOM loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(fixQuickStartButtons, 100);
+});
+
+// Also run when switching to home section
+const originalShowSection = window.showSection;
+if (originalShowSection) {
+    window.showSection = function(sectionId) {
+        originalShowSection(sectionId);
+        if (sectionId === 'home') {
+            setTimeout(fixQuickStartButtons, 50);
+        }
+    };
+}
+
