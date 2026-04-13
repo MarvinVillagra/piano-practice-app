@@ -1024,3 +1024,266 @@ function runPitchDetection() {
     };
     detect();
 }
+
+// ============== SONGS SECTION ==============
+function renderSongs(filter = 'all') {
+    const container = document.getElementById('song-list');
+    if (!container) return;
+    
+    let songs = [];
+    for (const [category, categorySongs] of Object.entries(songLibrary)) {
+        categorySongs.forEach(song => {
+            songs.push({ ...song, category });
+        });
+    }
+    
+    if (filter !== 'all') {
+        songs = songs.filter(s => s.category === filter);
+    }
+    
+    container.innerHTML = songs.map(song => `
+        <div class="song-card" onclick="openSongPractice('${song.id}', '${song.category}')">
+            <div class="song-cover">
+                ${song.category === 'classical' ? '🎼' : song.category === 'pop' ? '🎤' : song.category === 'jazz' ? '🎷' : song.category === 'hiphop' ? '🎧' : '🎵'}
+            </div>
+            <div class="song-info">
+                <div class="song-title">${song.title}</div>
+                <div class="song-artist">${song.composer}</div>
+                <div class="song-meta">
+                    <span>${song.tempo} BPM</span>
+                    <span>${song.timeSignature}</span>
+                    <span>${Math.floor(song.duration / 60)}m</span>
+                </div>
+                <div class="song-difficulty">
+                    ${[1,2,3,4,5].map(i => `<span class="diff-dot ${i <= song.difficulty ? 'filled' : ''}"></span>`).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterSongs(category) {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(category) || (category === 'all' && btn.textContent === 'All'));
+    });
+    renderSongs(category);
+}
+
+async function openSongPractice(songId, category) {
+    const song = songLibrary[category]?.find(s => s.id === songId);
+    if (!song) return;
+    
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    
+    body.innerHTML = `
+        <div class="song-practice-modal">
+            <h2>${song.title}</h2>
+            <p class="song-composer">${song.composer}</p>
+            
+            <div class="practice-controls">
+                <div class="control-group">
+                    <label>Hand:</label>
+                    <select id="hand-mode" onchange="changeHandMode(this.value)">
+                        <option value="both">Both Hands</option>
+                        <option value="right">Right Hand Only</option>
+                        <option value="left">Left Hand Only</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Speed:</label>
+                    <input type="range" id="song-speed" min="50" max="150" value="${song.tempo}" oninput="document.getElementById('speed-val').textContent = this.value">
+                    <span id="speed-val">${song.tempo}</span> BPM
+                </div>
+            </div>
+            
+            <div class="song-notes-display">
+                <h4>Notes to Play:</h4>
+                <div class="notes-sequence" id="notes-sequence">
+                    ${song.rightHand.slice(0, 10).map((n, i) => `<span class="sequence-note" data-index="${i}">${n}</span>`).join('')}
+                    ${song.rightHand.length > 10 ? '<span class="more-notes">...</span>' : ''}
+                </div>
+            </div>
+            
+            <div class="practice-buttons">
+                <button class="neon-btn" onclick="playSongDemo('${songId}', '${category}')">🔊 Preview</button>
+                <button class="neon-btn success" onclick="startSongPractice('${songId}', '${category}')">▶ Start Practice</button>
+            </div>
+            
+            <div class="song-info-extra">
+                <p>🎹 ${song.rightHand.length} notes (RH) • ${song.leftHand.length} notes (LH)</p>
+                <p>⏱️ Duration: ${Math.floor(song.duration / 60)}m ${song.duration % 60}s</p>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+function changeHandMode(mode) {
+    window.currentHandMode = mode;
+}
+
+async function playSongDemo(songId, category) {
+    const song = songLibrary[category]?.find(s => s.id === songId);
+    if (!song) return;
+    
+    const player = new SongPlayer();
+    await player.init();
+    player.loadSong(songId, category);
+    
+    const notes = window.currentHandMode === 'left' ? song.leftHand : 
+                  window.currentHandMode === 'right' ? song.rightHand : 
+                  [...song.rightHand];
+    
+    for (const note of notes.slice(0, 10)) {
+        await player.playNote(note, 0.3);
+        await new Promise(r => setTimeout(r, 400));
+    }
+}
+
+async function startSongPractice(songId, category) {
+    const song = songLibrary[category]?.find(s => s.id === songId);
+    if (!song) return;
+    
+    await initAudio();
+    await startListening();
+    
+    const bpm = parseInt(document.getElementById('song-speed')?.value || song.tempo);
+    const handMode = window.currentHandMode || 'both';
+    
+    const notes = handMode === 'left' ? song.leftHand : 
+                  handMode === 'right' ? song.rightHand : 
+                  song.rightHand;
+    
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    
+    body.innerHTML = `
+        <div class="practice-active">
+            <h2>${song.title}</h2>
+            
+            <div class="practice-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="song-progress" style="width: 0%"></div>
+                </div>
+                <span id="note-counter">0 / ${notes.length}</span>
+            </div>
+            
+            <div class="current-note-display">
+                <span class="note-label">Play:</span>
+                <span class="current-note" id="current-target-note">${notes[0]}</span>
+            </div>
+            
+            <div class="detection-area">
+                <h4>🎹 Listening...</h4>
+                <div class="detected-note" id="song-detected">-</div>
+            </div>
+            
+            <div class="stats-live">
+                <span>✓ <span id="correct-count">0</span></span>
+                <span>✗ <span id="wrong-count">0</span></span>
+            </div>
+        </div>
+    `;
+    
+    window.songState = {
+        notes,
+        currentIndex: 0,
+        correct: 0,
+        wrong: 0,
+        startTime: Date.now()
+    };
+    
+    runSongDetection();
+}
+
+function runSongDetection() {
+    const detect = () => {
+        if (!isListening || !window.songState) return;
+        
+        const result = detectPitch();
+        if (result) {
+            const detectedEl = document.getElementById('song-detected');
+            if (detectedEl) detectedEl.textContent = result.full;
+            
+            const state = window.songState;
+            const targetNote = state.notes[state.currentIndex];
+            
+            // Check if correct
+            const targetClean = targetNote.replace(/\d/g, '');
+            const playedClean = result.note;
+            
+            if (targetClean === playedClean) {
+                state.correct++;
+                state.currentIndex++;
+                
+                document.getElementById('correct-count').textContent = state.correct;
+                document.getElementById('note-counter').textContent = `${state.currentIndex} / ${state.notes.length}`;
+                
+                const progressPercent = (state.currentIndex / state.notes.length) * 100;
+                document.getElementById('song-progress').style.width = progressPercent + '%';
+                
+                if (state.currentIndex < state.notes.length) {
+                    document.getElementById('current-target-note').textContent = state.notes[state.currentIndex];
+                } else {
+                    // Completed!
+                    const duration = Math.round((Date.now() - state.startTime) / 60000);
+                    completeSongPractice(state.correct, state.notes.length, duration);
+                    return;
+                }
+            }
+        }
+        
+        requestAnimationFrame(detect);
+    };
+    detect();
+}
+
+function completeSongPractice(correct, total, duration) {
+    stopListening();
+    
+    const accuracy = Math.round((correct / total) * 100);
+    const xpEarned = Math.round(accuracy / 2);
+    addXP(xpEarned, 'Song completed');
+    
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    
+    body.innerHTML = `
+        <div class="song-complete">
+            <h2>🎉 Song Complete!</h2>
+            
+            <div class="completion-stats">
+                <div class="stat">
+                    <span class="big">${accuracy}%</span>
+                    <span class="label">Accuracy</span>
+                </div>
+                <div class="stat">
+                    <span class="big">${correct}/${total}</span>
+                    <span class="label">Notes</span>
+                </div>
+                <div class="stat">
+                    <span class="big">${duration}m</span>
+                    <span class="label">Duration</span>
+                </div>
+            </div>
+            
+            <div class="xp-earned">
+                +${xpEarned} XP
+            </div>
+            
+            <button class="neon-btn success" onclick="closeModal(); renderSongs();">Continue</button>
+        </div>
+    `;
+    
+    // Record in stats
+    const songsCompleted = JSON.parse(localStorage.getItem('songsCompleted') || '[]');
+    songsCompleted.push({ accuracy, total, duration, timestamp: Date.now() });
+    localStorage.setItem('songsCompleted', JSON.stringify(songsCompleted));
+}
+
+// Initialize songs on page load
+document.addEventListener('DOMContentLoaded', () => {
+    renderSongs();
+});

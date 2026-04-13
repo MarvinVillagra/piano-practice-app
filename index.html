@@ -196,6 +196,26 @@
 
             <!-- Tools Section -->
             <section id="tools" class="section">
+        <!-- Songs Section -->
+        <section id="songs" class="section">
+            <div class="glass-card">
+                <h2>🎵 Song Library</h2>
+                <p>Learn popular songs step by step</p>
+                
+                <div class="song-filters">
+                    <button class="filter-btn active" onclick="filterSongs('all')">All</button>
+                    <button class="filter-btn" onclick="filterSongs('classical')">Classical</button>
+                    <button class="filter-btn" onclick="filterSongs('pop')">Pop</button>
+                    <button class="filter-btn" onclick="filterSongs('jazz')">Jazz</button>
+                    <button class="filter-btn" onclick="filterSongs('hiphop')">Hip-Hop</button>
+                </div>
+                
+                <div class="song-list" id="song-list">
+                    <p>Loading songs...</p>
+                </div>
+            </div>
+        </section>
+        
 <!-- Ear Training Section -->
         <section id="ear-training" class="section">
             <div class="glass-card">
@@ -338,7 +358,8 @@
                 <span class="nav-icon">🛠️</span>
                 <span class="nav-label">Tools</span>
             </button>
-            <button class="nav-btn" data-section="ear-training">🎧 Train</button>
+            <button class="nav-btn" data-section="songs">🎵 Songs</button>
+                <button class="nav-btn" data-section="ear-training">🎧 Train</button>
                 <button class="nav-btn" data-section="settings">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Settings</span>
@@ -356,6 +377,11 @@
 
     <!-- Scripts -->
     <script src="music-theory.js"></script>
+    <script src="midi-support.js"></script>
+    <script src="practice-modes.js"></script>
+    <script src="song-library.js"></script>
+    <script src="sheet-music.js"></script>
+    <script src="statistics.js"></script>
     <script src="app-v2.js"></script>
 </body>
 </html>
