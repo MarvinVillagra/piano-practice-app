@@ -248,8 +248,7 @@ const completeScaleLibrary = {
         },
         'F': {
             notes: ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'Eb', 'F'],
-            fingering: { right: '1-2-3-4-1-2-3-4', left: '5-4-3-2-1-3-2
--1' },
+            fingering: { right: '1-2-3-4-1-2-3-4', left: '5-4-3-2-1-3-2-1' },
             relative: 'Ab major',
             sharps: [],
             flats: ['Bb', 'Eb', 'Ab', 'Db'],

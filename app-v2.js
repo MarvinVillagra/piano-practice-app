@@ -739,8 +739,7 @@ function startPractice() {
     showToast('Practice session started! 🎹', 'success');
 }
 
-function update
-Timer() {
+function updateTimer() {
     if (!sessionStartTime) return;
     const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
     const mins = Math.floor(elapsed / 60);
