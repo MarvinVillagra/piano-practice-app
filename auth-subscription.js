@@ -607,15 +607,20 @@ function updateUIForPremium() {
 const auth = new AuthSystem();
 const subscription = new SubscriptionManager(auth);
 
-// Check if user exists
+// Check if user exists - DISABLED FOR TESTING
 document.addEventListener('DOMContentLoaded', () => {
+    // Auto-auth disabled for testing - uncomment to re-enable
+    // if (!auth.user) {
+    //     setTimeout(() => {
+    //         showAuthModal('register');
+    //     }, 1000);
+    // } else {
+    //     updateUIForAuth();
+    // }
+    
+    // Create anonymous guest account for testing
     if (!auth.user) {
-        // Show welcome/auth modal for new users
-        setTimeout(() => {
-            showAuthModal('register');
-        }, 1000);
-    } else {
-        updateUIForAuth();
+        auth.createAnonymousAccount();
     }
 });
 
