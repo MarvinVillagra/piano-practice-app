@@ -1,0 +1,483 @@
+/* Piano Master - Musical Theme Styles */
+
+/* Musical background with staff lines */
+body {
+    background: 
+        linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f1f3a 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 40px,
+            rgba(255,255,255,0.02) 40px,
+            rgba(255,255,255,0.02) 41px
+        );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Floating musical notes animation */
+.musical-notes-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.note-float {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.1;
+    animation: floatNote 15s linear infinite;
+    color: var(--neon-purple);
+}
+
+.note-float:nth-child(1) { left: 5%; animation-delay: 0s; }
+.note-float:nth-child(2) { left: 15%; animation-delay: 2s; color: var(--neon-blue); }
+.note-float:nth-child(3) { left: 25%; animation-delay: 4s; color: var(--neon-pink); }
+.note-float:nth-child(4) { left: 35%; animation-delay: 6s; }
+.note-float:nth-child(5) { left: 45%; animation-delay: 8s; color: var(--neon-green); }
+.note-float:nth-child(6) { left: 55%; animation-delay: 10s; color: var(--neon-blue); }
+.note-float:nth-child(7) { left: 65%; animation-delay: 12s; color: var(--neon-pink); }
+.note-float:nth-child(8) { left: 75%; animation-delay: 14s; }
+.note-float:nth-child(9) { left: 85%; animation-delay: 1s; color: var(--neon-green); }
+.note-float:nth-child(10) { left: 95%; animation-delay: 3s; }
+
+@keyframes floatNote {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.1;
+    }
+    90% {
+        opacity: 0.1;
+    }
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Piano key inspired sections */
+.piano-key-section {
+    position: relative;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border-radius: 20px;
+    border-left: 4px solid;
+    margin: 20px 0;
+}
+
+.piano-key-section::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: currentColor;
+    opacity: 0.3;
+}
+
+/* Treble clef logo */
+.logo-clef {
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: clefPulse 2s ease-in-out infinite;
+}
+
+@keyframes clefPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Staff lines in header */
+.staff-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 0;
+    position: relative;
+}
+
+.staff-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+/* Note-shaped buttons */
+.note-btn {
+    position: relative;
+    padding: 15px 30px;
+    border: none;
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 50px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.note-btn::before {
+    content: '♪';
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.note-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(131, 56, 236, 0.5);
+}
+
+/* Metronome animation */
+.metronome-visual {
+    width: 100px;
+    height: 100px;
+    border: 3px solid var(--neon-purple);
+    border-radius: 50%;
+    position: relative;
+    margin: 20px auto;
+}
+
+.metronome-visual::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 40px;
+    background: var(--neon-pink);
+    transform-origin: bottom center;
+    animation: metronomeTick 1s ease-in-out infinite;
+    border-radius: 2px;
+}
+
+@keyframes metronomeTick {
+    0%, 100% { transform: translateX(-50%) rotate(-30deg); }
+    50% { transform: translateX(-50%) rotate(30deg); }
+}
+
+/* Musical measure sections */
+.measure-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.measure-beat {
+    padding: 15px;
+    background: var(--glass-bg);
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.measure-beat.active {
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+    box-shadow: 0 0 15px rgba(131, 56, 236, 0.5);
+}
+
+/* Sound wave animation */
+.sound-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 30px;
+}
+
+.sound-bar {
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to top, var(--neon-purple), var(--neon-pink));
+    border-radius: 2px;
+    animation: soundWave 0.8s ease-in-out infinite;
+}
+
+.sound-bar:nth-child(1) { animation-delay: 0s; height: 40%; }
+.sound-bar:nth-child(2) { animation-delay: 0.1s; height: 70%; }
+.sound-bar:nth-child(3) { animation-delay: 0.2s; height: 100%; }
+.sound-bar:nth-child(4) { animation-delay: 0.3s; height: 60%; }
+.sound-bar:nth-child(5) { animation-delay: 0.4s; height: 30%; }
+
+@keyframes soundWave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.5); }
+}
+
+/* Grand staff header */
+.grand-staff-header {
+    position: relative;
+    padding: 40px 20px;
+    text-align: center;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 15px,
+            rgba(255,255,255,0.05) 15px,
+            rgba(255,255,255,0.05) 16px
+        );
+    margin-bottom: 30px;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+.grand-staff-header::before,
+.grand-staff-header::after {
+    content: '𝄞';
+    position: absolute;
+    font-size: 4rem;
+    opacity: 0.1;
+    top: 20px;
+}
+
+.grand-staff-header::before {
+    left: 20px;
+}
+
+.grand-staff-header::after {
+    right: 20px;
+}
+
+/* Key signature display */
+.key-signature {
+    display: flex;
+    gap: 5px;
+    padding: 10px;
+    background: var(--glass-bg);
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.key-sig-note {
+    width: 20px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--neon-pink);
+}
+
+/* Time signature */
+.time-signature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+}
+
+.time-signature .top {
+    font-size: 2.5rem;
+}
+
+.time-signature .bottom {
+    font-size: 2rem;
+}
+
+/* Rest symbols */
+.rest-symbol {
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+/* Accent marks */
+.accent-mark {
+    color: var(--neon-yellow);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Musical dynamic marks */
+.dynamic-pp { font-size: 0.8rem; opacity: 0.5; }
+.dynamic-p { font-size: 0.9rem; opacity: 0.6; }
+.dynamic-mp { font-size: 1rem; opacity: 0.7; }
+.dynamic-mf { font-size: 1.1rem; opacity: 0.8; }
+.dynamic-f { font-size: 1.2rem; opacity: 0.9; }
+.dynamic-ff { font-size: 1.3rem; opacity: 1; }
+
+/* Pedal markings */
+.pedal-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 15px;
+    background: var(--glass-bg);
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.pedal-mark.down {
+    border-left: 3px solid var(--neon-purple);
+}
+
+.pedal-mark.up {
+    border-left: 3px solid var(--neon-pink);
+}
+
+/* Slur/tie decoration */
+.slur-decoration {
+    position: relative;
+}
+
+.slur-decoration::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    border-bottom: 2px solid var(--neon-blue);
+    border-radius: 50%;
+}
+
+/* Tremolo effect */
+.tremolo-effect {
+    animation: tremolo 0.1s ease-in-out infinite;
+}
+
+@keyframes tremolo {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+
+/* Trill decoration */
+.trill-decoration {
+    position: relative;
+}
+
+.trill-decoration::before {
+    content: 'tr~~~~';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    font-size: 0.8rem;
+    color: var(--neon-yellow);
+    letter-spacing: -1px;
+}
+
+/* Mordent */
+.mordent::after {
+    content: '𝆖';
+    color: var(--neon-pink);
+    margin-left: 2px;
+}
+
+/* Turn ornament */
+.turn-ornament::after {
+    content: '∞';
+    color: var(--neon-blue);
+    margin-left: 2px;
+    font-size: 0.8rem;
+}
+
+/* Fermata */
+.fermata {
+    position: relative;
+}
+
+.fermata::after {
+    content: '𝄐';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: var(--neon-purple);
+}
+
+/* Segno and Coda marks */
+.segno::before {
+    content: '𝄋';
+    margin-right: 5px;
+    color: var(--neon-green);
+}
+
+.coda::after {
+    content: '𝄌';
+    margin-left: 5px;
+    color: var(--neon-yellow);
+}
+
+/* Repeat signs */
+.repeat-start::before {
+    content: '|:';
+    margin-right: 10px;
+    font-weight: bold;
+    color: var(--neon-purple);
+}
+
+.repeat-end::after {
+    content: ':|';
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--neon-purple);
+}
+
+/* D.C. and D.S. markings */
+.dc-mark {
+    font-style: italic;
+    color: var(--neon-yellow);
+    font-size: 0.9rem;
+}
+
+/* Musical form sections */
+.musical-form-section {
+    border-left: 3px solid;
+    padding-left: 15px;
+    margin: 15px 0;
+}
+
+.form-a { border-color: var(--neon-purple); }
+.form-b { border-color: var(--neon-blue); }
+.form-c { border-color: var(--neon-pink); }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .note-float {
+        font-size: 1.5rem;
+    }
+    
+    .grand-staff-header::before,
+    .grand-staff-header::after {
+        font-size: 2.5rem;
+    }
+    
+    .measure-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
