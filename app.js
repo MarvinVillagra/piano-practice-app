@@ -2921,3 +2921,169 @@ if (originalShowSection) {
     };
 }
 
+
+// ============== COMPREHENSIVE BUTTON FIX ==============
+function fixAllButtons() {
+    console.log('Fixing all buttons...');
+    
+    // Quick Start buttons
+    const quickStartBtns = document.querySelectorAll('.action-btn');
+    quickStartBtns.forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const action = newBtn.dataset.action;
+            console.log('Quick start clicked:', action);
+            
+            switch(action) {
+                case 'drills':
+                    navigateTo('drills');
+                    break;
+                case 'scales':
+                    navigateTo('scales');
+                    break;
+                case 'sight-reading':
+                    navigateTo('tools');
+                    break;
+                case 'ear-training':
+                    navigateTo('tools');
+                    break;
+            }
+        });
+    });
+    
+    // Start Practice Session button
+    const startPracticeBtn = document.getElementById('start-practice');
+    if (startPracticeBtn) {
+        const newBtn = startPracticeBtn.cloneNode(true);
+        startPracticeBtn.parentNode.replaceChild(newBtn, startPracticeBtn);
+        
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Starting practice session...');
+            beginPracticeSession();
+        });
+    }
+    
+    // End session button
+    const endSessionBtn = document.getElementById('end-session');
+    if (endSessionBtn) {
+        const newBtn = endSessionBtn.cloneNode(true);
+        endSessionBtn.parentNode.replaceChild(newBtn, endSessionBtn);
+        
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            endPracticeSession();
+        });
+    }
+    
+    console.log('All buttons fixed!');
+}
+
+function navigateTo(sectionId) {
+    // Update nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.section === sectionId) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Update sections
+    document.querySelectorAll('.section').forEach(section => {
+        if (section.id === sectionId) {
+            section.classList.add('active');
+        } else {
+            section.classList.remove('active');
+        }
+    });
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
+
+function beginPracticeSession() {
+    console.log('Practice session started');
+    
+    // Track start time
+    window.sessionStartTime = Date.now();
+    
+    // Show session indicator
+    const indicator = document.getElementById('session-indicator');
+    if (indicator) {
+        indicator.style.display = 'flex';
+    }
+    
+    // Update timer
+    const timerEl = document.getElementById('session-time');
+    if (timerEl) {
+        window.sessionInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - window.sessionStartTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+    
+    // Navigate to drills
+    navigateTo('drills');
+    
+    // Show confirmation
+    showToast('Practice session started! ⏱️', 'success');
+}
+
+function endPracticeSession() {
+    if (!window.sessionStartTime) return;
+    
+    const elapsed = Math.floor((Date.now() - window.sessionStartTime) / 1000 / 60) || 5;
+    
+    // Log the practice
+    logPractice(`Practice session: ${elapsed} minutes`);
+    
+    // Stop timer
+    if (window.sessionInterval) {
+        clearInterval(window.sessionInterval);
+        window.sessionInterval = null;
+    }
+    
+    // Hide indicator
+    const indicator = document.getElementById('session-indicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+    
+    // Update stats
+    if (typeof updateHomeStats === 'function') {
+        updateHomeStats();
+    }
+    
+    // Navigate to home
+    navigateTo('home');
+    
+    // Show completion
+    showToast(`Practice complete! ${elapsed} minutes logged 🎉`, 'success');
+    
+    window.sessionStartTime = null;
+}
+
+// Run fixes on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(fixAllButtons, 200);
+});
+
+// Also run when switching to home
+setInterval(() => {
+    const homeSection = document.getElementById('home');
+    if (homeSection && homeSection.classList.contains('active')) {
+        // Re-attach if needed
+        const startBtn = document.getElementById('start-practice');
+        if (startBtn && !startBtn.hasAttribute('data-fixed')) {
+            startBtn.setAttribute('data-fixed', 'true');
+            fixAllButtons();
+        }
+    }
+}, 5000);
+
