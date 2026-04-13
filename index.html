@@ -196,6 +196,23 @@
 
             <!-- Tools Section -->
             <section id="tools" class="section">
+<!-- Ear Training Section -->
+        <section id="ear-training" class="section">
+            <div class="glass-card">
+                <h2>🎧 Ear Training</h2>
+                <p>Train your ear to recognize intervals and chords</p>
+                
+                <div class="ear-training-modes">
+                    <button class="neon-btn" onclick="startIntervalTraining()">🎹 Interval Quiz</button>
+                    <button class="neon-btn" onclick="startChordQuiz()">🎵 Chord Recognition</button>
+                    <button class="neon-btn" onclick="startPitchMatch()">🎯 Pitch Matching</button>
+                </div>
+                
+                <div id="ear-training-content" class="training-area">
+                    <p>Select a mode above to begin training</p>
+                </div>
+            </div>
+        </section>
                 <h2 class="section-title">🛠️ Practice Tools</h2>
                 <div class="tools-grid">
                     <!-- Metronome -->
@@ -321,7 +338,8 @@
                 <span class="nav-icon">🛠️</span>
                 <span class="nav-label">Tools</span>
             </button>
-            <button class="nav-btn" data-section="settings">
+            <button class="nav-btn" data-section="ear-training">🎧 Train</button>
+                <button class="nav-btn" data-section="settings">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Settings</span>
             </button>

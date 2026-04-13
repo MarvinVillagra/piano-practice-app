@@ -845,3 +845,182 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Clear all data?')) { localStorage.clear(); location.reload(); }
     });
 });
+
+// ============== EAR TRAINING ==============
+let earTraining = null;
+
+async function startIntervalTraining() {
+    if (!earTraining) earTraining = new EarTraining();
+    await earTraining.init();
+    
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    const quiz = earTraining.generateQuiz(1)[0];
+    
+    body.innerHTML = `
+        <div class="ear-training-modal">
+            <h2>🎹 Interval Training</h2>
+            <p>Listen and identify the interval</p>
+            
+            <button class="neon-btn large" onclick="playQuizInterval(${quiz.interval.semitones})">
+                🔊 Play Interval
+            </button>
+            
+            <div class="quiz-options">
+                ${quiz.options.map(o => `
+                    <button class="neon-btn option" onclick="checkIntervalAnswer('${o.name}', '${quiz.interval.name}')">
+                        ${o.name}
+                    </button>
+                `).join('')}
+            </div>
+            
+            <div class="interval-hint">
+                <p>💡 Song reference: ${quiz.interval.song}</p>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+async function playQuizInterval(semitones) {
+    if (!earTraining) earTraining = new EarTraining();
+    await earTraining.init();
+    await earTraining.playInterval(semitones, 'C4');
+}
+
+function checkIntervalAnswer(selected, correct) {
+    if (selected === correct) {
+        showToast('Correct! 🎉', 'success');
+        addXP(10, 'Correct interval');
+    } else {
+        showToast('Try again! It was ' + correct, 'error');
+    }
+    setTimeout(() => startIntervalTraining(), 1500);
+}
+
+async function startChordQuiz() {
+    const chordPlayer = new ChordPlayer();
+    await chordPlayer.init();
+    
+    const chordTypes = Object.keys(ChordShapes);
+    const correctType = chordTypes[Math.floor(Math.random() * chordTypes.length)];
+    const chord = buildChord('C', correctType);
+    
+    // Generate options
+    const options = [correctType];
+    while (options.length < 4) {
+        const random = chordTypes[Math.floor(Math.random() * chordTypes.length)];
+        if (!options.includes(random)) options.push(random);
+    }
+    options.sort(() => Math.random() - 0.5);
+    
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    
+    body.innerHTML = `
+        <div class="ear-training-modal">
+            <h2>🎵 Chord Recognition</h2>
+            <p>Listen and identify the chord type</p>
+            
+            <button class="neon-btn large" onclick="playChordQuiz()">🔊 Play Chord</button>
+            
+            <div class="quiz-options">
+                ${options.map(o => `
+                    <button class="neon-btn option" onclick="checkChordAnswer('${o}', '${correctType}')">
+                        ${o.replace('major', 'Major').replace('minor', 'Minor')}
+                    </button>
+                `).join('')}
+            </div>
+            
+            <div class="chord-notes">
+                <p>Notes: ${chord.join(' - ')}</p>
+                <p>Mood: ${ChordShapes[correctType].mood}</p>
+            </div>
+        </div>
+    `;
+    
+    window.currentChordQuiz = { notes: chord };
+    modal.classList.add('active');
+}
+
+async function playChordQuiz() {
+    const player = new ChordPlayer();
+    await player.init();
+    if (window.currentChordQuiz) {
+        await player.playChord(window.currentChordQuiz.notes, 1.5);
+    }
+}
+
+function checkChordAnswer(selected, correct) {
+    if (selected === correct) {
+        showToast('Correct! 🎵', 'success');
+        addXP(15, 'Correct chord');
+    } else {
+        showToast('Not quite! It was ' + correct, 'error');
+    }
+    setTimeout(() => startChordQuiz(), 1500);
+}
+
+async function startPitchMatch() {
+    await initAudio();
+    await startListening();
+    
+    const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const targetNote = notes[Math.floor(Math.random() * notes.length)] + '4';
+    
+    const modal = document.getElementById('modal');
+    const body = document.getElementById('modal-body');
+    
+    body.innerHTML = `
+        <div class="ear-training-modal">
+            <h2>🎯 Pitch Matching</h2>
+            <p>Play this note on your piano</p>
+            
+            <div class="target-note-large">${targetNote}</div>
+            
+            <div class="detection-area">
+                <h4>🎹 I'm listening...</h4>
+                <div class="detected-note" id="pitch-detected">-</div>
+            </div>
+            
+            <div class="pitch-feedback" id="pitch-feedback"></div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+    
+    window.targetPitch = targetNote;
+    runPitchDetection();
+}
+
+function runPitchDetection() {
+    const detect = () => {
+        if (!isListening) return;
+        
+        const result = detectPitch();
+        if (result) {
+            const detectedEl = document.getElementById('pitch-detected');
+            const feedbackEl = document.getElementById('pitch-feedback');
+            
+            if (detectedEl) detectedEl.textContent = result.full;
+            
+            const target = window.targetPitch?.replace(/\d/g, '');
+            const played = result.note;
+            
+            if (target === played) {
+                if (feedbackEl) {
+                    feedbackEl.textContent = '✓ Perfect match!';
+                    feedbackEl.className = 'pitch-feedback correct';
+                }
+                addXP(5, 'Pitch matched');
+                showToast('+5 XP!', 'success');
+            }
+        }
+        
+        if (document.querySelector('.ear-training-modal')) {
+            requestAnimationFrame(detect);
+        }
+    };
+    detect();
+}
