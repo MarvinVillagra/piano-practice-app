@@ -10,6 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="ui-v2.css">
+    <link rel="stylesheet" href="premium-ui.css">
     <link rel="stylesheet" href="modern-ui.css">
     <link rel="stylesheet" href="musical-theme.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -346,6 +347,7 @@
                 </div>
                 <button class="neon-btn" onclick="showAccountModal()" style="width: 100%; margin-bottom: 10px;">🔐 My Account</button>
                 <button class="neon-btn danger" id="clear-data">Clear All Data</button>
+                <button class="btn-premium btn-premium-primary" onclick="subscription.showSubscriptionModal()" style="width: 100%; margin-top: 20px;">👑 Upgrade to Premium</button>
             </section>
         </main>
 
@@ -396,6 +398,7 @@
     <script src="onboarding.js"></script>
     <script src="theory-reference.js"></script>
     <script src="session-timer.js"></script>
+    <script src="auth-subscription.js"></script>
     <script src="app-v2.js"></script>
 </body>
 </html>
